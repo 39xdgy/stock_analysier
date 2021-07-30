@@ -1,0 +1,2 @@
+pandas-datareader
+get-all-tickers
