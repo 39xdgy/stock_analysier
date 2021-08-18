@@ -1,13 +1,16 @@
 import pandas as pd
 import pandas_datareader as web
+import stockstats
 import os
-class stock_data:
 
-    def __init__(self, read_data = False, stock_name = "", start_date = "", end_date = ""):
+class stock_data:
+    def __init__(self, stock_name = "", start_date = "", end_date = ""):
         self._stock_name = stock_name
         self._start_date = start_date
         self._end_date = end_date
         self._stock_data = None
+        self._buy_flag = {}
+        self._sell_flag = {}
 
     #----------------------------------------------------
 
@@ -23,16 +26,28 @@ class stock_data:
     def get_stock_data(self):
         return self._stock_data
 
+    def get_buy_flag(self) -> dict:
+        return self._buy_flag
+
+    def get_sell_flag(self) -> dict:
+        return self._sell_flag
+
     #---------------------------------------
 
-    def set_stock_name(self, stock_name: str) -> str:
+    def set_stock_name(self, stock_name: str):
         self._stock_name = stock_name
 
-    def set_start_date(self, start_date: str) -> str:
+    def set_start_date(self, start_date: str):
         self._start_date = start_date
 
-    def set_end_date(self, end_date: str) -> str:
+    def set_end_date(self, end_date: str):
         self._end_date = end_date
+
+    def set_buy_flag(self, buy_flag: dict):
+        return self._buy_flag
+
+    def set_sell_flag(self, sell_flag: dict):
+        return self._sell_flag
     
     #---------------------------------------
 
@@ -62,10 +77,75 @@ class stock_data:
             return True
         else:
             return False
-        
+
+    def get_stats_info(self, info_list):
+        try:
+            stockStat = stockstats.StockDataFrame.retype(self._stock_data)
+            for info in info_list:
+                self._stock_data[info] = stockStat[[info]]
+            return True
+        except:
+            return False
+
+    def should_buy(self):
+        output = {}
+        for key, value in self._buy_flag:
+            if "cross" in key:
+                diff = self._stock_data[self._end_date]["kdjk"] - self._stock_data[self._end_date]["kdjd"]
+                if diff > 0: output[key] = True
+                elif diff == 0:
+                    double_check = self._stock_data[self._stock_data.index[-2]]["kdjk"] - self._stock_data[self._stock_data.index[-2]]["kdjd"]
+                    if double_check > 0: output[key] = True
+                    else: output[key] = False
+                else: output[key] = False
+            else:
+                data_value = self._stock_data[self._end_date][key]
+                last_data_value = self._stock_data[self._stock_data.index[-2]][key]
+                if key == "macdh":
+                    if data_value > 0: output[key] = True
+                    elif data_value == 0:
+                        if last_data_value >= 0: output[key] = True
+                        else: output[key] = False
+                    else: output[key] = False
+                if key == "kdjk":
+                    if data_value <= value: output[key] = True
+                    else: output[key] = False
+        return output
+
+    def should_sell(self):
+        output = {}
+        for key, value in self._sell_flag:
+            if "cross" in key:
+                diff = self._stock_data[self._end_date]["kdjk"] - self._stock_data[self._end_date]["kdjd"]
+                if diff < 0:
+                    output[key] = True
+                elif diff == 0:
+                    double_check = double_check = self._stock_data[self._stock_data.index[-2]]["kdjk"] - self._stock_data[self._stock_data.index[-2]]["kdjd"]
+                    if double_check > 0: output[key] = True
+                    else: output[key] = False
+                else:
+                    data_value = self._stock_data[self._end_date][key]
+                    last_data_value = self._stock_data[self._stock_data.index[-2]][key] 
+                    if key == "macdh":
+                        if data_value < 0: output[key] = True
+                        elif data_value == 0:
+                            if last_data_value < 0: output[key] = True
+                            else: output[key] = False
+                        else: output[key] = False
+                    if key == "kdjk":
+                        if data_value >= value: output[key] = True
+                        else: output[key] = False
+
+        return output
+
+    
+
 
 if __name__ == "__main__":
     #testing only
-    test = stock_data("AAPL", '2016-01-04', '2021-07-01')
+    test = stock_data()
+    print(test)
     test.read_from_json('AAPL.json')
     print(test)
+    test.get_stats_info(['macd', 'macds', 'macdh', 'kdjk', 'kdjd', 'kdjj', 'rsi_6', 'rsi_12', 'rsi_14'])
+    print(test.get_stock_data())
