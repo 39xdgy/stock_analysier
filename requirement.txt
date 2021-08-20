@@ -1,2 +1,2 @@
 pandas-datareader
-get-all-tickers
+webull

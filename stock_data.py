@@ -107,7 +107,7 @@ class stock_data:
                         if last_data_value >= 0: output[key] = True
                         else: output[key] = False
                     else: output[key] = False
-                if key == "kdjk":
+                if key == "kdjj":
                     if data_value <= value: output[key] = True
                     else: output[key] = False
         return output
@@ -132,7 +132,7 @@ class stock_data:
                             if last_data_value < 0: output[key] = True
                             else: output[key] = False
                         else: output[key] = False
-                    if key == "kdjk":
+                    if key == "kdjj":
                         if data_value >= value: output[key] = True
                         else: output[key] = False
 
