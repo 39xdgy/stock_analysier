@@ -47,13 +47,13 @@ for stock_name in stock_info.keys():
         start = 0
         end = len(sorted_list)
         mid = len(sorted_list) // 2
-        while start > end:
+        while start >= end:
             #print(f'{start} {end} {mid}')
             #print(f'{sorted_list[start][sort_key]} {sorted_list[end][sort_key]} {sorted_list[mid][sort_key]}')
             if sorted_list[mid][sort_key] >= compare_data:
                 end = mid - 1
             else:
-                start = mid
+                start = mid + 1
             mid = (end - start) // 2 + start
         mid += 1
         sorted_list = sorted_list[:mid] + [stock_info[stock_name]] + sorted_list[mid:]
