@@ -1,5 +1,6 @@
 import pandas as pd
 import pandas_datareader as web
+import yfinance as yf
 import stockstats
 import os
 
@@ -63,6 +64,7 @@ class stock_data:
         if(self._stock_name == "" or self._start_date == "" or self._end_date == ""):
             return False
         self._stock_data = web.DataReader(self._stock_name,'yahoo',self._start_date, self._end_date)
+        #self._stock_data = yf.download(self._stock_name, self._start_date, self._end_date, interval = "5m")
         return True
 
     def write_to_json(self):
