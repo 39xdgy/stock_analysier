@@ -25,5 +25,4 @@ file.close()
 
 # important to get the account_id
 print(wb.get_account_id())
-#print(wb.cancel_order(order_id = 47043537))
-print(wb.place_order(stock = "AAPL", action = "SELL", orderType = "MKT", enforce = "DAY", quant = 10))
+print(wb.place_order(stock = "AAPL", action = "SELL", price = 150, orderType = "MKT", enforce = "DAY", quant = 40))
