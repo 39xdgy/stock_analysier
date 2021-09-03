@@ -23,12 +23,32 @@ for line in f:
         each_stock = {}
 
 #print(len(stock_info))
-#print(stock_info.keys())
+#print(list(stock_info.keys())[0])
 
-sorted_list = []
+sorted_list = [stock_info[list(stock_info.keys())[0]]]
 sort_key = 'fail_chance'
 
+for stock_name in list(stock_info.keys())[1:]:
+    last_val = sorted_list[-1][sort_key]
+    check_val = stock_info[stock_name][sort_key]
+    if check_val > last_val:
+        continue
+    for i in range(0, len(sorted_list)):
+        loop_val = sorted_list[i][sort_key]
+        if loop_val > check_val:
+            sorted_list = sorted_list[:i] + [stock_info[stock_name]] + sorted_list[i:]
+            break
+    if len(sorted_list) > 10:
+        sorted_list = sorted_list[:-1]
 
+sorted_name = []
+for stock in sorted_list:
+    #print(stock)
+    print(f'stock: {stock["name"]}\t count: {stock["trade_count"]}\t fail: {stock[sort_key]}\n')
+    #sorted_name = 
+    #print()
+
+'''
 for stock_name in stock_info.keys():
     compare_data = stock_info[stock_name][sort_key]
     #print(stock_name)
@@ -61,3 +81,4 @@ for stock_name in stock_info.keys():
 #print(sorted_list)
 for stock in sorted_list:
     print(stock[sort_key])
+'''
