@@ -1,11 +1,14 @@
 from webull import paper_webull, webull
+from stock_data import stock_data
+import datetime
 import json
 class user:
 
-    def __init__(self):
-        #self.stock_list = stock_list
-        #self._login_info = user_login_info
-        self.wb = webull()#paper_webull()
+    def __init__(self, json_path, stock_dic, is_pwb = True):
+        self.stock_dic = stock_dic
+        self.json_path = json_path
+        self.is_pwb = is_pwb
+        self.wb = webull()
         self.pwb = paper_webull()
 
     '''
@@ -13,8 +16,30 @@ class user:
         return self._login_info
     '''
 
-    def login_trading(self, json_path):
-        fh = open(json_path, 'r')
+    def trade(self):
+        for key, value in self.stock_dic:
+            each_stock = stock_data(stock_name = key, start_date = datetime.date.today() - datetime.timedelta(day = 365), end_date = datetime.date.today())
+            each_stock.read_stock_from_yahoo()
+            each_stock.set_buy_flag({'kdjj': 15})
+            each_stock.set_sell_flag({'kdjj': 85})
+            each_stock.get_stats_info(['kdjj'])
+            
+            if value == 0 and each_stock.should_buy()['kdjj']:
+                if self.is_pwb:
+                    self.pwb.place_order(stock = key, action = "BUY", orderType = "MKT", quant = 10000 // each_stock.get_current_price())
+                else:
+                    self.wb.place_order(stock = key, action = "BUY", orderType = "MKT", quant = 10000 // each_stock.get_current_price())
+            
+            if value != 0 and each_stock.should_sell()['kdjj']:
+                if self.is_pwb:
+                    self.pwb.place_order(stock = key, action = "SELL", orderType = "MKT", quant = 10000 // each_stock.get_current_price())
+                else:
+                    self.wb.place_order(stock = key, action = "SELL", orderType = "MKT", quant = 10000 // each_stock.get_current_price())
+
+
+
+    def login_wb(self):
+        fh = open(self.json_path, 'r')
         credential_data = json.load(fh)
         fh.close()
 
@@ -29,15 +54,15 @@ class user:
         credential_data['accessToken'] = n_data['accessToken']
         credential_data['tokenExpireTime'] = n_data['tokenExpireTime']
 
-        file = open('webull_credentials.json', 'w')
+        file = open(self.json_path, 'w')
         json.dump(credential_data, file)
         file.close()
 
         # important to get the account_id
         return self.wb.get_account_id()
 
-    def login_paper_trading(self, json_path):
-        fh = open(json_path, 'r')
+    def login_pwb(self):
+        fh = open(self.json_path, 'r')
         credential_data = json.load(fh)
         fh.close()
 
@@ -52,7 +77,7 @@ class user:
         credential_data['accessToken'] = n_data['accessToken']
         credential_data['tokenExpireTime'] = n_data['tokenExpireTime']
 
-        file = open('webull_credentials.json', 'w')
+        file = open(self.json_path, 'w')
         json.dump(credential_data, file)
         file.close()
 
@@ -61,8 +86,8 @@ class user:
 
 
 if __name__ == "__main__":
-    test_user = user()
-    wb_id = test_user.login_trading("webull_credentials.json")
-    pwb_id = test_user.login_paper_trading("webull_credentials.json")
+    test_user = user("webull_credentials.json", [])
+    wb_id = test_user.login_wb()
+    pwb_id = test_user.login_pwb()
     print(wb_id)
     print(pwb_id)

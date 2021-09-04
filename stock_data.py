@@ -89,6 +89,9 @@ class stock_data:
         except:
             return False
 
+    def get_current_price(self):
+        return self._stock_data[self._end_date]['close']
+
     def should_buy(self):
         output = {}
         for key, value in self._buy_flag:
