@@ -48,37 +48,6 @@ for stock in sorted_list:
     #sorted_name = 
     #print()
 
-'''
-for stock_name in stock_info.keys():
-    compare_data = stock_info[stock_name][sort_key]
-    #print(stock_name)
-    if(len(sorted_list) == 0):
-        sorted_list.append(stock_info[stock_name])
-    elif(len(sorted_list) == 1):
-        if(sorted_list[0][sort_key] < compare_data):
-            sorted_list.append(stock_info[stock_name])
-        else:
-            sorted_list = [stock_info[stock_name]] + sorted_list
-    elif(sorted_list[0][sort_key] >= compare_data):
-        sorted_list = [stock_info[stock_name]] + sorted_list
-    elif(sorted_list[-1][sort_key] <= compare_data):
-        sorted_list.append(stock_info[stock_name])
-    else:
-        start = 0
-        end = len(sorted_list)
-        mid = len(sorted_list) // 2
-        while start >= end:
-            #print(f'{start} {end} {mid}')
-            #print(f'{sorted_list[start][sort_key]} {sorted_list[end][sort_key]} {sorted_list[mid][sort_key]}')
-            if sorted_list[mid][sort_key] >= compare_data:
-                end = mid - 1
-            else:
-                start = mid + 1
-            mid = (end - start) // 2 + start
-        mid += 1
-        sorted_list = sorted_list[:mid] + [stock_info[stock_name]] + sorted_list[mid:]
-
-#print(sorted_list)
-for stock in sorted_list:
-    print(stock[sort_key])
-'''
+f = open('top_20_output.txt', 'w')
+f.write(str(sorted_list))
+f.close()
