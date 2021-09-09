@@ -16,13 +16,14 @@ class user:
         return self._login_info
     '''
 
-    def trade(self):
+    def trade(self, input_data):
+        stats_index, buy_flag, sell_flag = input_data
         for key, value in self.stock_dic:
             each_stock = stock_data(stock_name = key, start_date = datetime.date.today() - datetime.timedelta(day = 365), end_date = datetime.date.today())
             each_stock.read_stock_from_yahoo()
-            each_stock.set_buy_flag({'kdjj': 15})
-            each_stock.set_sell_flag({'kdjj': 85})
-            each_stock.get_stats_info(['kdjj'])
+            each_stock.set_buy_flag(buy_flag)#{'kdjj': 15})
+            each_stock.set_sell_flag(sell_flag)#{'kdjj': 85})
+            each_stock.get_stats_info(stats_index)#['kdjj'])
             
             if value == 0 and each_stock.should_buy()['kdjj']:
                 if self.is_pwb:
