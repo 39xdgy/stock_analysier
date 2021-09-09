@@ -86,7 +86,7 @@ class user:
 
 
 if __name__ == "__main__":
-    test_user = user("webull_credentials.json", [])
+    test_user = user("..\\data\\webull_credentials.json", [])
     wb_id = test_user.login_wb()
     pwb_id = test_user.login_pwb()
     print(wb_id)

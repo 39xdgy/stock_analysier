@@ -1,8 +1,12 @@
-from stock_data import stock_data
 import datetime as dt
-from get_all_tickers import get_tickers as gt
+import sys
+
 import pandas
+
 #print(gt.get_tickers(NYSE = False, NASDAQ = True, AMEX = True))
+
+sys.path.append('../Class/')
+from stock_data import stock_data
 
 start = dt.datetime.now() - dt.timedelta(days = 365*3)
 start = start.strftime('%Y-%m-%d')
@@ -14,10 +18,10 @@ stock_list = ["AAPL", "SBUX", "ZM", "TWTR", "GME", "DIS", "V", "INTC", "NVDA", "
 write_info = f'Top 20 \n\n'
 
 fail_list = []
-csv_list = pandas.read_csv('nasdaq_screener.csv')
+csv_list = pandas.read_csv('../data/nasdaq_screener.csv')
 all_stock_list = csv_list[csv_list.columns[0]]
 #print(all_stock_list)
-for each_stock in all_stock_list:
+for each_stock in stock_list:
     try:
         stock = stock_data(stock_name=each_stock, start_date= start, end_date= today)
 
@@ -25,7 +29,7 @@ for each_stock in all_stock_list:
         stock.get_stats_info(stock_info)
 
         #print(stock.get_stock_data())
-
+        
         stock.set_buy_flag({"macdh": None})
         stock.set_sell_flag({"macdh": None})
         time_diff = 0
@@ -46,7 +50,7 @@ for each_stock in all_stock_list:
         for index, row in stock.get_stock_data().iterrows():
             #print(row['macdh'])
             diff = row['kdjk'] - row['kdjd']
-            if flag: 
+            if flag:
                 if row['kdjj'] < 15 and not sell_flag:
                     sell_flag = True
                     trade_count += 0.5
@@ -57,7 +61,7 @@ for each_stock in all_stock_list:
                     stock_num = base_value // row['close']
                     base_value -= stock_num * row['close']
                     #print(f'{each_stock} buying with {stock_num} of stocks. Orgin value is {base_value}.\n')
-                
+
             if sell_flag:
                 if row['kdjj'] > 85 and not flag:
                     trade_count += 0.5
@@ -102,7 +106,7 @@ for each_stock in all_stock_list:
     except:
         fail_list.append(each_stock)
 
-f = open("all_stock_output.txt", "w")
+f = open("..\\data\\all_stock_output.txt", "w")
 f.write(write_info)
 f.close()
 

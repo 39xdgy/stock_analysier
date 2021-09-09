@@ -148,9 +148,9 @@ class stock_data:
 
 if __name__ == "__main__":
     #testing only
-    test = stock_data()
+    test = stock_data(stock_name="AAPL")
     print(test)
-    test.read_from_json('AAPL.json')
+    test.read_from_json('..\\data\\AAPL.json')
     print(test)
     test.get_stats_info(['macd', 'macds', 'macdh', 'kdjk', 'kdjd', 'kdjj', 'rsi_6', 'rsi_12', 'rsi_14'])
     print(test.get_stock_data())
