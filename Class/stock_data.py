@@ -1,5 +1,6 @@
 import pandas as pd
 import pandas_datareader as web
+import yfinance as yf
 import stockstats
 import os
 
@@ -63,6 +64,7 @@ class stock_data:
         if(self._stock_name == "" or self._start_date == "" or self._end_date == ""):
             return False
         self._stock_data = web.DataReader(self._stock_name,'yahoo',self._start_date, self._end_date)
+        #self._stock_data = yf.download(self._stock_name, self._start_date, self._end_date, interval = "5m")
         return True
 
     def write_to_json(self):
@@ -86,6 +88,9 @@ class stock_data:
             return True
         except:
             return False
+
+    def get_current_price(self):
+        return self._stock_data[self._end_date]['close']
 
     def should_buy(self):
         output = {}
@@ -143,9 +148,9 @@ class stock_data:
 
 if __name__ == "__main__":
     #testing only
-    test = stock_data()
+    test = stock_data(stock_name="AAPL")
     print(test)
-    test.read_from_json('AAPL.json')
+    test.read_from_json('..\\data\\AAPL.json')
     print(test)
     test.get_stats_info(['macd', 'macds', 'macdh', 'kdjk', 'kdjd', 'kdjj', 'rsi_6', 'rsi_12', 'rsi_14'])
     print(test.get_stock_data())
