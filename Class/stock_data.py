@@ -8,7 +8,7 @@ class stock_data:
     def __init__(self, stock_name = "", start_date = "", end_date = ""):
         self._stock_name = stock_name
         self._start_date = start_date
-        self._end_date = end_date
+        self._end_date = str(end_date)
         self._stock_data = None
         self._buy_flag = {}
         self._sell_flag = {}
@@ -45,10 +45,10 @@ class stock_data:
         self._end_date = end_date
 
     def set_buy_flag(self, buy_flag: dict):
-        return self._buy_flag
+        self._buy_flag = buy_flag
 
     def set_sell_flag(self, sell_flag: dict):
-        return self._sell_flag
+        self._sell_flag = sell_flag
     
     #---------------------------------------
 
@@ -90,55 +90,64 @@ class stock_data:
             return False
 
     def get_current_price(self):
-        return self._stock_data[self._end_date]['close']
+        return self._stock_data.tail(1)['close']
+
+    def update_stock_info(self, info_list):
+        self.read_stock_from_yahoo()
+        self.get_stats_info(info_list)
+
 
     def should_buy(self):
         output = {}
-        for key, value in self._buy_flag:
+        for key in self._buy_flag:
+            value = self._buy_flag[key]
             if "cross" in key:
-                diff = self._stock_data[self._end_date]["kdjk"] - self._stock_data[self._end_date]["kdjd"]
+                diff = self._stock_data.tail(1)["kdjk"] - self._stock_data.tail(1)["kdjd"]
                 if diff > 0: output[key] = True
                 elif diff == 0:
-                    double_check = self._stock_data[self._stock_data.index[-2]]["kdjk"] - self._stock_data[self._stock_data.index[-2]]["kdjd"]
+                    double_check = self._stock_data.iloc[-2]["kdjk"] - self._stock_data.iloc[-2]["kdjd"]
                     if double_check > 0: output[key] = True
                     else: output[key] = False
                 else: output[key] = False
             else:
-                data_value = self._stock_data[self._end_date][key]
-                last_data_value = self._stock_data[self._stock_data.index[-2]][key]
+                test = self._stock_data.tail(1)
+                data_value= self._stock_data.tail(1)[key]
+                last_data_value = self._stock_data.iloc[-2][key]
                 if key == "macdh":
-                    if data_value > 0: output[key] = True
-                    elif data_value == 0:
+                    if data_value.iat[0]> 0: output[key] = True
+                    elif data_value.iat[0]== 0:
                         if last_data_value >= 0: output[key] = True
                         else: output[key] = False
                     else: output[key] = False
                 if key == "kdjj":
-                    if data_value <= value: output[key] = True
+                    if data_value.iat[0]<= value: output[key] = True
                     else: output[key] = False
+
         return output
 
     def should_sell(self):
         output = {}
-        for key, value in self._sell_flag:
+        for key in self._sell_flag:
+            value = self._sell_flag[key]
             if "cross" in key:
-                diff = self._stock_data[self._end_date]["kdjk"] - self._stock_data[self._end_date]["kdjd"]
+                diff = self._stock_data.tail(1)["kdjk"] - self._stock_data.tail(1)["kdjd"]
                 if diff < 0:
                     output[key] = True
                 elif diff == 0:
-                    double_check = double_check = self._stock_data[self._stock_data.index[-2]]["kdjk"] - self._stock_data[self._stock_data.index[-2]]["kdjd"]
+                    double_check = double_check = self._stock_data.iloc[-2]["kdjk"] - self._stock_data.iloc[-2]["kdjd"]
                     if double_check > 0: output[key] = True
                     else: output[key] = False
                 else:
-                    data_value = self._stock_data[self._end_date][key]
-                    last_data_value = self._stock_data[self._stock_data.index[-2]][key] 
+                    data_value= self._stock_data.tail(1)[key]
+                    last_data_value = self._stock_data.iloc[-2][key] 
                     if key == "macdh":
-                        if data_value < 0: output[key] = True
-                        elif data_value == 0:
+                        if data_value.iat[0]< 0: output[key] = True
+                        elif data_value.iat[0]== 0:
                             if last_data_value < 0: output[key] = True
                             else: output[key] = False
                         else: output[key] = False
                     if key == "kdjj":
-                        if data_value >= value: output[key] = True
+                        if data_value.iat[0]>= value: output[key] = True
                         else: output[key] = False
 
         return output

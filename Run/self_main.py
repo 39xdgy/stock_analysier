@@ -11,7 +11,7 @@ stock_dic = {}
 for key in stock_list:
     stock_dic[key] = 0
 
-kdj_user = user(json_path = "../data/webull_credentials.json", stock_dic = stock_dic)
+kdj_user = user(json_path = "../Data/webull_credentials.json", stock_dic = stock_dic)
 
 kdj_user.login_pwb()
 kdj_user.login_wb()

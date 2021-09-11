@@ -10,21 +10,31 @@ class user:
         self.is_pwb = is_pwb
         self.wb = webull()
         self.pwb = paper_webull()
+        self.stats_index = {}
+        self.buy_flag = {}
+        self.sell_flag = {}
 
-    '''
-    def get_login_info(self):
-        return self._login_info
-    '''
+    
+    def set_stock_data(self, input_data):
+        self.stats_index, self.buy_flag, self.sell_flag = input_data
+        
+    
 
-    def trade(self, input_data):
-        stats_index, buy_flag, sell_flag = input_data
-        for key, value in self.stock_dic:
-            each_stock = stock_data(stock_name = key, start_date = datetime.date.today() - datetime.timedelta(day = 365), end_date = datetime.date.today())
+    def trade(self):
+        print("trade start")
+        #print(self.buy_flag)
+        #print(self.sell_flag)
+        #print(self.stats_index)
+        
+        for key in self.stock_dic:
+            value = self.stock_dic[key]
+            each_stock = stock_data(stock_name = key, start_date = datetime.date.today() - datetime.timedelta(days = 365), end_date = datetime.date.today())
             each_stock.read_stock_from_yahoo()
-            each_stock.set_buy_flag(buy_flag)#{'kdjj': 15})
-            each_stock.set_sell_flag(sell_flag)#{'kdjj': 85})
-            each_stock.get_stats_info(stats_index)#['kdjj'])
-            
+            each_stock.set_buy_flag(self.buy_flag)#{'kdjj': 15})
+            each_stock.set_sell_flag(self.sell_flag)#{'kdjj': 85})
+            each_stock.get_stats_info(self.stats_index)#['kdjj'])
+            should_buy = each_stock.should_buy()
+            should_sell = each_stock.should_sell()
             if value == 0 and each_stock.should_buy()['kdjj']:
                 if self.is_pwb:
                     self.pwb.place_order(stock = key, action = "BUY", orderType = "MKT", quant = 10000 // each_stock.get_current_price())
@@ -36,6 +46,9 @@ class user:
                     self.pwb.place_order(stock = key, action = "SELL", orderType = "MKT", quant = 10000 // each_stock.get_current_price())
                 else:
                     self.wb.place_order(stock = key, action = "SELL", orderType = "MKT", quant = 10000 // each_stock.get_current_price())
+        print("trade finished")
+
+            
 
 
 
@@ -50,7 +63,7 @@ class user:
         self.wb._uuid = credential_data['uuid']
 
         n_data = self.wb.refresh_login()
-
+        #print(n_data)
         credential_data['refreshToken'] = n_data['refreshToken']
         credential_data['accessToken'] = n_data['accessToken']
         credential_data['tokenExpireTime'] = n_data['tokenExpireTime']
@@ -87,8 +100,32 @@ class user:
 
 
 if __name__ == "__main__":
-    test_user = user("..\\data\\webull_credentials.json", [])
+    import schedule, time
+
+    stock_list = ["TTE", "SGOC", "CPK", "HQI", "TDAC", "NXPI", "AB", "FIVN", "SILV", "HUBS"]
+    stock_dic = {}
+    for key in stock_list:
+        stock_dic[key] = 0
+
+    test_user = user("../Data/webull_credentials.json", stock_dic)
     wb_id = test_user.login_wb()
     pwb_id = test_user.login_pwb()
-    print(wb_id)
-    print(pwb_id)
+    #print(wb_id)
+    #print(pwb_id)
+
+
+    stats_index = ['kdjj']
+    buy_flag = {'kdjj': 15}
+    sell_flag = {'kdjj': 85}
+    test_user.set_stock_data((stats_index, buy_flag, sell_flag))
+    schedule.every().saturday.at("14:42").do(test_user.trade)
+    #test_user.trade((stats_index, buy_flag, sell_flag))
+
+    #test_user.trade()
+
+    
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+        #print("still going")
+    
