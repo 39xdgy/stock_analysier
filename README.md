@@ -11,8 +11,10 @@ Very old school lol
 
 ### TODO
 * Add trade record into the user
+* add Chinese and Japanese readme
 * make it more user interactive with all the rules
 * add comments in my code(Sorry I will try my best to make it better)
+* using different api for the stock data to make the day trading possible.
 
 
 ### Helps
