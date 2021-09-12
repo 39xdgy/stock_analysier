@@ -1,7 +1,7 @@
 from webull import paper_webull, webull
 from stock_data import stock_data
-import datetime
-import json
+from trade import trade as td
+import datetime, json
 class user:
 
     def __init__(self, json_path, stock_dic, is_pwb = True):
@@ -13,6 +13,8 @@ class user:
         self.stats_index = {}
         self.buy_flag = {}
         self.sell_flag = {}
+        self.trade_counter = {}
+        self.trade_record = []
 
     
     def set_stock_data(self, input_data):
@@ -35,20 +37,38 @@ class user:
             each_stock.get_stats_info(self.stats_index)#['kdjj'])
             should_buy = each_stock.should_buy()
             should_sell = each_stock.should_sell()
+            quant = 10000 // each_stock.get_current_price()
             if value == 0 and each_stock.should_buy()['kdjj']:
+                new_td = td()
+                new_td.buy_update(name = key, start_time = datetime.date.today(), start_price = each_stock.get_current_price(), amount = quant)
+                self._trade_counter[key] = new_td
+                value = quant
+                
                 if self.is_pwb:
-                    self.pwb.place_order(stock = key, action = "BUY", orderType = "MKT", quant = 10000 // each_stock.get_current_price())
+                    self.pwb.place_order(stock = key, action = "BUY", orderType = "MKT", quant = quant)
                 else:
-                    self.wb.place_order(stock = key, action = "BUY", orderType = "MKT", quant = 10000 // each_stock.get_current_price())
+                    self.wb.place_order(stock = key, action = "BUY", orderType = "MKT", quant = quant)
             
             if value != 0 and each_stock.should_sell()['kdjj']:
+                finished_td = self._trade_counter[key]
+                finished_td.sell_update(end_time = datetime.date.today(), end_price = each_stock.get_current_price())
+                self.trade_record.append(finished_td)
+                value = 0
                 if self.is_pwb:
-                    self.pwb.place_order(stock = key, action = "SELL", orderType = "MKT", quant = 10000 // each_stock.get_current_price())
+                    self.pwb.place_order(stock = key, action = "SELL", orderType = "MKT", quant = quant)
                 else:
-                    self.wb.place_order(stock = key, action = "SELL", orderType = "MKT", quant = 10000 // each_stock.get_current_price())
+                    self.wb.place_order(stock = key, action = "SELL", orderType = "MKT", quant = quant)
         print("trade finished")
 
-            
+    def write_trade_record(self):
+        f = open("./Data/trade_record.txt", "w")
+        write_str = ''
+        for record in self.trade_record:
+            write_str += str(record)
+            write_str += "\n\n"
+
+        f.write(write_str)
+        f.close()
 
 
 

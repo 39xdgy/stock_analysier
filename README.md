@@ -10,7 +10,7 @@ pip install -r requirement.txt
 Very old school lol
 
 ### TODO
-* Add trade record into the user
+* Add trade record into the user (finished code, need testing)
 * add Chinese and Japanese readme
 * make it more user interactive with all the rules
 * add comments in my code(Sorry I will try my best to make it better)
