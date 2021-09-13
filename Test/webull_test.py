@@ -4,7 +4,7 @@ from webull import paper_webull # for real trading, import 'webull'
 wb = paper_webull()
 
 
-fh = open('webull_credentials.json', 'r')
+fh = open('../Data/webull_credentials.json', 'r')
 credential_data = json.load(fh)
 fh.close()
 
