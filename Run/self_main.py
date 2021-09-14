@@ -22,11 +22,11 @@ sell_flag = {'kdjj': 85}
 
 kdj_user.set_trade_data((stats_index, buy_flag, sell_flag))
 
-schedule.every().monday.at("15:45").do(kdj_user.trade, (stats_index, buy_flag, sell_flag))
-schedule.every().tuesday.at("15:45").do(kdj_user.trade, (stats_index, buy_flag, sell_flag))
-schedule.every().wednesday.at("15:45").do(kdj_user.trade, (stats_index, buy_flag, sell_flag))
-schedule.every().thursday.at("15:45").do(kdj_user.trade, (stats_index, buy_flag, sell_flag))
-schedule.every().friday.at("15:45").do(kdj_user.trade, (stats_index, buy_flag, sell_flag))
+schedule.every().monday.at("15:45").do(kdj_user.trade)
+schedule.every().tuesday.at("15:45").do(kdj_user.trade)
+schedule.every().wednesday.at("15:45").do(kdj_user.trade)
+schedule.every().thursday.at("15:45").do(kdj_user.trade)
+schedule.every().friday.at("15:45").do(kdj_user.trade)
 
 while True:
     schedule.run_pending()
