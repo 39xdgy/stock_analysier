@@ -41,7 +41,7 @@ class user:
             if value == 0 and each_stock.should_buy()['kdjj']:
                 new_td = td()
                 new_td.buy_update(name = key, start_time = datetime.date.today(), start_price = each_stock.get_current_price(), amount = quant)
-                self._trade_counter[key] = new_td
+                self.trade_counter[key] = new_td
                 value = quant
                 
                 if self.is_pwb:
@@ -50,7 +50,7 @@ class user:
                     self.wb.place_order(stock = key, action = "BUY", orderType = "MKT", quant = quant)
             
             if value != 0 and each_stock.should_sell()['kdjj']:
-                finished_td = self._trade_counter[key]
+                finished_td = self.trade_counter[key]
                 finished_td.sell_update(end_time = datetime.date.today(), end_price = each_stock.get_current_price())
                 self.trade_record.append(finished_td)
                 value = 0
