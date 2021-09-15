@@ -1,7 +1,7 @@
 import yfinance as yf
 import stockstats
 
-data = yf.download(tickers = 'AAPL', period = '1d', interval = '5m')
+data = yf.download(tickers = 'AAPL')
 
 info_list = ['kdjk', 'kdjd', 'kdjj']
 

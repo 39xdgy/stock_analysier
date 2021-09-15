@@ -20,7 +20,6 @@ pip install -r requirement.txt
 * 使用trade class来记录所有交易
 * 开发一个用户界面/用户输入系统来交易股票
 * 代码中增加注释
-* 更换股票数据api(以此来实现超短线操作)
 
 ### 帮助
 

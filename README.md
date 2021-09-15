@@ -19,10 +19,9 @@ After you create the folder with the file inside. just go to the "Run" folder an
 
 ### TODO
 * Add trade record into the user (finished code, need testing)
-* add Chinese and Japanese readme
+* Add Japanese readme
 * make it more user interactive with all the rules
 * add comments in my code(Sorry I will try my best to make it better)
-* using different api for the stock data to make the day trading possible.
 
 
 ### Helps

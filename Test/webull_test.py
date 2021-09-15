@@ -14,12 +14,12 @@ wb._token_expire = credential_data['tokenExpireTime']
 wb._uuid = credential_data['uuid']
 
 n_data = wb.refresh_login()
-
+print(n_data)
 credential_data['refreshToken'] = n_data['refreshToken']
 credential_data['accessToken'] = n_data['accessToken']
 credential_data['tokenExpireTime'] = n_data['tokenExpireTime']
 
-file = open('webull_credentials.json', 'w')
+file = open('../Data/webull_credentials.json', 'w')
 json.dump(credential_data, file)
 file.close()
 
