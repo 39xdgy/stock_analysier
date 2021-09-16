@@ -90,7 +90,7 @@ class stock_data:
             return False
 
     def get_current_price(self):
-        return self._stock_data.tail(1)['close']
+        return self._stock_data.at[self._stock_data.index[-1] ,'close']
 
     def update_stock_info(self, info_list):
         self.read_stock_from_yahoo()
@@ -102,25 +102,24 @@ class stock_data:
         for key in self._buy_flag:
             value = self._buy_flag[key]
             if "cross" in key:
-                diff = self._stock_data.tail(1)["kdjk"] - self._stock_data.tail(1)["kdjd"]
+                diff = self._stock_data.at[self._stock_data.index[-1], "kdjk"] - self._stock_data.at[self._stock_data.index[-1], "kdjd"]
                 if diff > 0: output[key] = True
                 elif diff == 0:
-                    double_check = self._stock_data.iloc[-2]["kdjk"] - self._stock_data.iloc[-2]["kdjd"]
+                    double_check = self._stock_data.at[self._stock_data.index[-2], "kdjk"] - self._stock_data.at[self._stock_data.index[-2], "kdjd"]
                     if double_check > 0: output[key] = True
                     else: output[key] = False
                 else: output[key] = False
             else:
-                test = self._stock_data.tail(1)
-                data_value= self._stock_data.tail(1)[key]
-                last_data_value = self._stock_data.iloc[-2][key]
+                data_value= self._stock_data.at[self._stock_data.index[-1], key]
+                last_data_value = self._stock_data.at[self._stock_data.index[-2], key]
                 if key == "macdh":
-                    if data_value.iat[0]> 0: output[key] = True
-                    elif data_value.iat[0]== 0:
+                    if data_value> 0: output[key] = True
+                    elif data_value== 0:
                         if last_data_value >= 0: output[key] = True
                         else: output[key] = False
                     else: output[key] = False
                 if key == "kdjj":
-                    if data_value.iat[0]<= value: output[key] = True
+                    if data_value<= value: output[key] = True
                     else: output[key] = False
 
         return output
@@ -130,25 +129,26 @@ class stock_data:
         for key in self._sell_flag:
             value = self._sell_flag[key]
             if "cross" in key:
-                diff = self._stock_data.tail(1)["kdjk"] - self._stock_data.tail(1)["kdjd"]
+                diff = self._stock_data.at[self._stock_data.index[-1], "kdjk"] - self._stock_data.at[self._stock_data.index[-1], "kdjd"]
                 if diff < 0:
                     output[key] = True
                 elif diff == 0:
-                    double_check = double_check = self._stock_data.iloc[-2]["kdjk"] - self._stock_data.iloc[-2]["kdjd"]
+                    double_check = double_check = self._stock_data.at[self._stock_data.index[-2], "kdjk"] - self._stock_data.at[self._stock_data.index[-2], "kdjd"]
                     if double_check > 0: output[key] = True
                     else: output[key] = False
-                else:
-                    data_value= self._stock_data.tail(1)[key]
-                    last_data_value = self._stock_data.iloc[-2][key] 
-                    if key == "macdh":
-                        if data_value.iat[0]< 0: output[key] = True
-                        elif data_value.iat[0]== 0:
-                            if last_data_value < 0: output[key] = True
-                            else: output[key] = False
+                else: output[key] = False
+            else:
+                data_value= self._stock_data.at[self._stock_data.index[-1], key]
+                last_data_value = self._stock_data.at[self._stock_data.index[-2], key] 
+                if key == "macdh":
+                    if data_value< 0: output[key] = True
+                    elif data_value== 0:
+                        if last_data_value < 0: output[key] = True
                         else: output[key] = False
-                    if key == "kdjj":
-                        if data_value.iat[0]>= value: output[key] = True
-                        else: output[key] = False
+                    else: output[key] = False
+                if key == "kdjj":
+                    if data_value>= value: output[key] = True
+                    else: output[key] = False
 
         return output
 
@@ -157,9 +157,19 @@ class stock_data:
 
 if __name__ == "__main__":
     #testing only
-    test = stock_data(stock_name="AAPL")
+    test = stock_data(stock_name="AAPL", start_date = "2020-01-01", end_date = "2020-09-01")
+    test.read_stock_from_yahoo()
     print(test)
-    test.read_from_json('..\\data\\AAPL.json')
-    print(test)
+    #test.read_from_json('..\\data\\AAPL.json')
     test.get_stats_info(['macd', 'macds', 'macdh', 'kdjk', 'kdjd', 'kdjj', 'rsi_6', 'rsi_12', 'rsi_14'])
-    print(test.get_stock_data())
+    stats_index = ['kdjj']
+    buy_flag = {'kdjj': 15}
+    sell_flag = {'kdjj': 85}
+
+    test.set_buy_flag(buy_flag)
+    test.set_sell_flag(sell_flag)
+    
+    
+    print(test.get_current_price())
+    print(test.should_buy())
+    print(test.should_sell())
