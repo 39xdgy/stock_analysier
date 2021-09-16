@@ -1,7 +1,9 @@
 from webull import paper_webull, webull
 from stock_data import stock_data
 from trade import trade as td
-import datetime, json
+from datetime import datetime
+
+import json
 class user:
 
     def __init__(self, json_path, stock_dic, is_pwb = True):
@@ -34,31 +36,33 @@ class user:
         print("trade start")
         
         for key in self.stock_dic:
+            print()
             value = self.stock_dic[key]
             each_stock = self._create_stock_info(key)
             should_buy = each_stock.should_buy()
             should_sell = each_stock.should_sell()
+            print(type(should_sell['kdjj']))
             quant = 10000 // each_stock.get_current_price()
+            print(each_stock.get_current_price())
+            real_quant = 1500 // each_stock.get_current_price()
             if value == 0 and should_buy['kdjj']:
                 new_td = td()
-                new_td.buy_update(name = key, start_time = str(datetime.date.now()), start_price = each_stock.get_current_price(), amount = quant)
-                self._trade_counter[key] = new_td
+                new_td.buy_update(name = key, start_time = str(datetime.now()), start_price = each_stock.get_current_price(), amount = quant)
+                self.trade_counter[key] = new_td
                 value = quant
                 
-                if self.is_pwb:
-                    self.pwb.place_order(stock = key, action = "BUY", orderType = "MKT", quant = quant)
-                else:
-                    self.wb.place_order(stock = key, action = "BUY", orderType = "MKT", quant = quant)
+                if self.is_pwb: self.pwb.place_order(stock = key, action = "BUY", orderType = "MKT", quant = quant)
+                else: self.wb.place_order(stock = key, action = "BUY", orderType = "MKT", quant = real_quant)
             
+
+            #print(value)
             if (not value == 0) and should_sell['kdjj']:
                 finished_td = self._trade_counter[key]
-                finished_td.sell_update(end_time = str(datetime.date.now()), end_price = each_stock.get_current_price())
+                finished_td.sell_update(end_time = str(datetime.now()), end_price = each_stock.get_current_price())
                 self.trade_record.append(finished_td)
                 value = 0
-                if self.is_pwb:
-                    self.pwb.place_order(stock = key, action = "SELL", orderType = "MKT", quant = quant)
-                else:
-                    self.wb.place_order(stock = key, action = "SELL", orderType = "MKT", quant = quant)
+                if self.is_pwb: self.pwb.place_order(stock = key, action = "SELL", orderType = "MKT", quant = quant)
+                else: self.wb.place_order(stock = key, action = "SELL", orderType = "MKT", quant = real_quant)
         print("trade finished")
 
     def write_trade_record(self):
@@ -139,14 +143,15 @@ if __name__ == "__main__":
     buy_flag = {'kdjj': 15}
     sell_flag = {'kdjj': 85}
     test_user.set_trade_data((stats_index, buy_flag, sell_flag))
-    schedule.every().saturday.at("14:42").do(test_user.trade)
-    #test_user.trade((stats_index, buy_flag, sell_flag))
+    #schedule.every().saturday.at("14:42").do(test_user.trade)
+    test_user.trade()
 
     #test_user.trade()
 
-    
+    '''
     while True:
         schedule.run_pending()
         time.sleep(1)
         #print("still going")
+    '''
     
