@@ -1,12 +1,16 @@
 # stock_analysier
 
-English | [简体中文](./README-zh_CN.md)
+English | [简体中文](./README-zh_CN.md) | [日本語(まだ完成してません)](./README-JP.md)
 
 This is a application that would screen the stock and send message/auto buy/sell stocks by using an webull account. 
 
 ## Installation 
 
+Just clone the repo to use it. 
+
 ```bash
+git clone https://github.com/39xdgy/stock_analysier.git
+cd stock_analysier
 pip install -r requirement.txt
 ```
 Very old school lol

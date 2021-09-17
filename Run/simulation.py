@@ -14,16 +14,16 @@ today = dt.datetime.today().strftime('%Y-%m-%d')
 stock_info = ['kdjj']#['macd', 'macds', 'macdh', 'kdjk', 'kdjd', 'kdjj', 'rsi_6', 'rsi_12', 'rsi_14']
 
 stock_list = ["AAPL", "SBUX", "ZM", "TWTR", "GME", "DIS", "V", "INTC", "NVDA", "LYFT", "AMRN"]
-#stock_list = ["TTE", "SGOC", "CPK", "HQI", "TDAC", "NXPI", "AB", "FIVN", "SILV", "HUBS"]
+stock_list += ["TTE", "SGOC", "CPK", "HQI", "TDAC", "NXPI", "AB", "FIVN", "SILV", "HUBS"]
 write_info = f'Top 20 \n\n'
 total_outcome = 0
 fail_list = []
 csv_list = pandas.read_csv('../Data/nasdaq_screener.csv')
 all_stock_list = csv_list[csv_list.columns[0]]
-print(all_stock_list)
+start_time = dt.datetime.now()
 for each_stock in stock_list:
     try:
-        stock = stock_data(stock_name=each_stock, period = '1d')
+        stock = stock_data(stock_name=each_stock)#, period = '1d')
 
         stock.get_stats_info(stock_info)
 
@@ -34,7 +34,7 @@ for each_stock in stock_list:
         time_diff = 0
         time_sum = 0
         time_tracker = [-1, -1]
-        base_value = 1500
+        base_value = 10000
         stock_num = 0
         flag = True
 
@@ -44,7 +44,7 @@ for each_stock in stock_list:
 
         trade_count = 0
         fail_count = 0
-        value_record = 1500
+        value_record = 10000
         temp_price = 0.0
         for index, row in stock.get_stock_data().iterrows():
             #print(row['macdh'])
@@ -91,7 +91,7 @@ for each_stock in stock_list:
 
         if stock_num != 0:
             #print("BRO")
-            base_value += stock.get_stock_data().iloc[-1]["close"] * stock_num
+            base_value += stock.get_current_price() * stock_num
 
 
         if fail_count / trade_count <= 0.20 and trade_count >= 20 and base_value > 10100:
@@ -118,7 +118,5 @@ f.close()
 
 print("fail_list here")
 print(fail_list)
-
-print(dt.datetime.now())
-
-print(total_outcome / 10)
+print(f'Start at: {start_time}')
+print(f'End at: {dt.datetime.now()}')
