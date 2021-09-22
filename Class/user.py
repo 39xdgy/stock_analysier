@@ -67,7 +67,7 @@ class user:
         print("trade finished")
 
     def write_trade_record(self):
-        f = open("./Data/trade_record.txt", "w")
+        f = open("./Data/trade_record.txt", "a")
         write_str = ''
         for record in self.trade_record:
             write_str += str(record)

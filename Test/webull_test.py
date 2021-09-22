@@ -14,7 +14,6 @@ wb._token_expire = credential_data['tokenExpireTime']
 wb._uuid = credential_data['uuid']
 
 n_data = wb.refresh_login()
-print(n_data)
 credential_data['refreshToken'] = n_data['refreshToken']
 credential_data['accessToken'] = n_data['accessToken']
 credential_data['tokenExpireTime'] = n_data['tokenExpireTime']
@@ -25,4 +24,5 @@ file.close()
 
 # important to get the account_id
 print(wb.get_account_id())
-print(wb.place_order(stock = "AAPL", action = "SELL", price = 150, orderType = "MKT", enforce = "DAY", quant = 40))
+
+print(wb.get_financials(stock = "AAPL"))
