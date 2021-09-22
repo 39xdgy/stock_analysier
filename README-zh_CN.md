@@ -1,12 +1,16 @@
 # 股票自动交易系统
 
-[English](./README.md) | 简体中文
+[English](./README.md) | 简体中文 | [日本語(まだ完成してません)](./README-JP.md)
 
 这个repo是一个使用股票指数来选股，以及使用webull的api去进行自动交易的脚本
 
 ## 安装
 
+直接clone这个repo就可以使用
+
 ```bash
+git clone https://github.com/39xdgy/stock_analysier.git
+cd stock_analysier
 pip install -r requirement.txt
 ```
 
@@ -20,7 +24,6 @@ pip install -r requirement.txt
 * 使用trade class来记录所有交易
 * 开发一个用户界面/用户输入系统来交易股票
 * 代码中增加注释
-* 更换股票数据api(以此来实现超短线操作)
 
 ### 帮助
 

@@ -20,7 +20,7 @@ stats_index = ['kdjj']
 buy_flag = {'kdjj': 15}
 sell_flag = {'kdjj': 85}
 
-kdj_user.set_trade_data((stats_index, buy_flag, sell_flag))
+kdj_user.set_stock_data((stats_index, buy_flag, sell_flag))
 
 schedule.every().monday.at("15:45").do(kdj_user.trade)
 schedule.every().tuesday.at("15:45").do(kdj_user.trade)

@@ -1,7 +1,9 @@
 from webull import paper_webull, webull
 from stock_data import stock_data
 from trade import trade as td
-import datetime, json
+from datetime import datetime
+
+import json
 class user:
 
     def __init__(self, json_path, stock_dic, is_pwb = True):
@@ -16,48 +18,51 @@ class user:
         self.trade_counter = {}
         self.trade_record = []
 
+
+    def _create_stock_info(self, stock_name):
+        each_stock = stock_data(stock_name = stock_name)
+        each_stock.set_buy_flag(self.buy_flag)
+        each_stock.set_sell_flag(self.sell_flag)
+        each_stock.get_stats_info(self.stats_index)
+        return each_stock
+
     
-    def set_stock_data(self, input_data):
+    def set_trade_data(self, input_data):
         self.stats_index, self.buy_flag, self.sell_flag = input_data
         
     
 
     def trade(self):
         print("trade start")
-        #print(self.buy_flag)
-        #print(self.sell_flag)
-        #print(self.stats_index)
         
         for key in self.stock_dic:
+            print()
             value = self.stock_dic[key]
-            each_stock = stock_data(stock_name = key, start_date = datetime.date.today() - datetime.timedelta(days = 365), end_date = datetime.date.today())
-            each_stock.read_stock_from_yahoo()
-            each_stock.set_buy_flag(self.buy_flag)#{'kdjj': 15})
-            each_stock.set_sell_flag(self.sell_flag)#{'kdjj': 85})
-            each_stock.get_stats_info(self.stats_index)#['kdjj'])
+            each_stock = self._create_stock_info(key)
             should_buy = each_stock.should_buy()
             should_sell = each_stock.should_sell()
+            print(type(should_sell['kdjj']))
             quant = 10000 // each_stock.get_current_price()
-            if value == 0 and each_stock.should_buy()['kdjj']:
+            print(each_stock.get_current_price())
+            real_quant = 1500 // each_stock.get_current_price()
+            if value == 0 and should_buy['kdjj']:
                 new_td = td()
-                new_td.buy_update(name = key, start_time = datetime.date.today(), start_price = each_stock.get_current_price(), amount = quant)
-                self._trade_counter[key] = new_td
+                new_td.buy_update(name = key, start_time = str(datetime.now()), start_price = each_stock.get_current_price(), amount = quant)
+                self.trade_counter[key] = new_td
                 value = quant
                 
-                if self.is_pwb:
-                    self.pwb.place_order(stock = key, action = "BUY", orderType = "MKT", quant = quant)
-                else:
-                    self.wb.place_order(stock = key, action = "BUY", orderType = "MKT", quant = quant)
+                if self.is_pwb: self.pwb.place_order(stock = key, action = "BUY", orderType = "MKT", quant = quant)
+                else: self.wb.place_order(stock = key, action = "BUY", orderType = "MKT", quant = real_quant)
             
-            if value != 0 and each_stock.should_sell()['kdjj']:
+
+            #print(value)
+            if (not value == 0) and should_sell['kdjj']:
                 finished_td = self._trade_counter[key]
-                finished_td.sell_update(end_time = datetime.date.today(), end_price = each_stock.get_current_price())
+                finished_td.sell_update(end_time = str(datetime.now()), end_price = each_stock.get_current_price())
                 self.trade_record.append(finished_td)
                 value = 0
-                if self.is_pwb:
-                    self.pwb.place_order(stock = key, action = "SELL", orderType = "MKT", quant = quant)
-                else:
-                    self.wb.place_order(stock = key, action = "SELL", orderType = "MKT", quant = quant)
+                if self.is_pwb: self.pwb.place_order(stock = key, action = "SELL", orderType = "MKT", quant = quant)
+                else: self.wb.place_order(stock = key, action = "SELL", orderType = "MKT", quant = real_quant)
         print("trade finished")
 
     def write_trade_record(self):
@@ -137,15 +142,16 @@ if __name__ == "__main__":
     stats_index = ['kdjj']
     buy_flag = {'kdjj': 15}
     sell_flag = {'kdjj': 85}
-    test_user.set_stock_data((stats_index, buy_flag, sell_flag))
-    schedule.every().saturday.at("14:42").do(test_user.trade)
-    #test_user.trade((stats_index, buy_flag, sell_flag))
+    test_user.set_trade_data((stats_index, buy_flag, sell_flag))
+    #schedule.every().saturday.at("14:42").do(test_user.trade)
+    test_user.trade()
 
     #test_user.trade()
 
-    
+    '''
     while True:
         schedule.run_pending()
         time.sleep(1)
         #print("still going")
+    '''
     
