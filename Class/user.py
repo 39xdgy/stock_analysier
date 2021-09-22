@@ -6,7 +6,7 @@ from datetime import datetime
 import json
 class user:
 
-    def __init__(self, json_path, stock_dic, is_pwb = True):
+    def __init__(self, json_path, stock_dic, is_pwb = True, data_range = ['3d', '1m']):
         self.stock_dic = stock_dic
         self.json_path = json_path
         self.is_pwb = is_pwb
@@ -17,10 +17,11 @@ class user:
         self.sell_flag = {}
         self.trade_counter = {}
         self.trade_record = []
+        self.data_range = data_range
 
 
     def _create_stock_info(self, stock_name):
-        each_stock = stock_data(stock_name = stock_name)
+        each_stock = stock_data(stock_name = stock_name, period = self.data_range[0], interval = self.data_range[1])
         each_stock.set_buy_flag(self.buy_flag)
         each_stock.set_sell_flag(self.sell_flag)
         each_stock.get_stats_info(self.stats_index)

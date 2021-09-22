@@ -11,7 +11,7 @@ stock_dic = {}
 for key in stock_list:
     stock_dic[key] = 0
 
-kdj_user = user(json_path = "../Data/webull_credentials.json", stock_dic = stock_dic)
+kdj_user = user(json_path = "../Data/webull_credentials.json", stock_dic = stock_dic, data_range = ['1y', '1d'])
 
 kdj_user.login_pwb()
 kdj_user.login_wb()
@@ -20,7 +20,7 @@ stats_index = ['kdjj']
 buy_flag = {'kdjj': 15}
 sell_flag = {'kdjj': 85}
 
-kdj_user.set_stock_data((stats_index, buy_flag, sell_flag))
+kdj_user.set_trade_data((stats_index, buy_flag, sell_flag))
 
 schedule.every().monday.at("15:45").do(kdj_user.trade)
 schedule.every().tuesday.at("15:45").do(kdj_user.trade)
