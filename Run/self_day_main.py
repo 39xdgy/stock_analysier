@@ -21,9 +21,9 @@ buy_flag = {'kdjj': 15}
 sell_flag = {'kdjj': 85}
 
 kdj_user.set_trade_data((stats_index, buy_flag, sell_flag))
+
 for m in range(30, 60):
     tot_time = f'09:{str(m)}'
-    print(tot_time)
     schedule.every().monday.at(tot_time).do(kdj_user.trade)
     schedule.every().tuesday.at(tot_time).do(kdj_user.trade)
     schedule.every().wednesday.at(tot_time).do(kdj_user.trade)
@@ -36,7 +36,6 @@ for h in range(10, 16):
         h_str, m_str = str(h), str(m)
         if(len(m_str) == 1): m_str = "0" + m_str
         tot_time = f'{h_str}:{m_str}'
-        print(tot_time)
         schedule.every().monday.at(tot_time).do(kdj_user.trade)
         schedule.every().tuesday.at(tot_time).do(kdj_user.trade)
         schedule.every().wednesday.at(tot_time).do(kdj_user.trade)
@@ -44,6 +43,5 @@ for h in range(10, 16):
         schedule.every().friday.at(tot_time).do(kdj_user.trade)
 
 while True:
-    print("uo")
     schedule.run_pending()
     time.sleep(10)

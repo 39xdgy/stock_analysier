@@ -45,7 +45,7 @@ class user:
             print(type(should_sell['kdjj']))
             quant = 10000 // each_stock.get_current_price()
             print(each_stock.get_current_price())
-            real_quant = 1500 // each_stock.get_current_price()
+            real_quant = 150 // each_stock.get_current_price()
             if value == 0 and should_buy['kdjj']:
                 new_td = td()
                 new_td.buy_update(name = key, start_time = str(datetime.now()), start_price = each_stock.get_current_price(), amount = quant)
