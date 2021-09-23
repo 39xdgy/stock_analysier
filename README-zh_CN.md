@@ -1,6 +1,6 @@
 # 股票自动交易系统
 
-[English](./README.md) | 简体中文 | [日本語(まだ完成してません)](./README-JP.md)
+[English](./README.md) | 简体中文 | [日本語(まだ完成しておりません)](./README-JP.md)
 
 这个repo是一个使用股票指数来选股，以及使用webull的api去进行自动交易的脚本
 
