@@ -53,6 +53,8 @@ schedule.every().wednesday.at("15:45").do(long_user.trade)
 schedule.every().thursday.at("15:45").do(long_user.trade)
 schedule.every().friday.at("15:45").do(long_user.trade)
 
+schedule.every().saturday.at("15:00").do(long_user.login_wb)
+schedule.every().saturday.at("16:00").do(short_user.login_pwb)
 while True:
     schedule.run_pending()
     time.sleep(10)
