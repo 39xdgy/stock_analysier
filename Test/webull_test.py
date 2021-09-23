@@ -14,15 +14,15 @@ wb._token_expire = credential_data['tokenExpireTime']
 wb._uuid = credential_data['uuid']
 
 n_data = wb.refresh_login()
-
 credential_data['refreshToken'] = n_data['refreshToken']
 credential_data['accessToken'] = n_data['accessToken']
 credential_data['tokenExpireTime'] = n_data['tokenExpireTime']
 
-file = open('webull_credentials.json', 'w')
+file = open('../Data/webull_credentials.json', 'w')
 json.dump(credential_data, file)
 file.close()
 
 # important to get the account_id
 print(wb.get_account_id())
-print(wb.place_order(stock = "AAPL", action = "SELL", price = 150, orderType = "MKT", enforce = "DAY", quant = 40))
+
+print(wb.get_financials(stock = "AAPL"))
