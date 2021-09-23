@@ -19,7 +19,7 @@ class user:
         self.trade_record = []
         self.data_range = data_range
 
-
+    # helper function to get stock data
     def _create_stock_info(self, stock_name):
         each_stock = stock_data(stock_name = stock_name, period = self.data_range[0], interval = self.data_range[1])
         each_stock.set_buy_flag(self.buy_flag)
@@ -27,12 +27,11 @@ class user:
         each_stock.get_stats_info(self.stats_index)
         return each_stock
 
-    
+    # set up all the trading flags and indexs
     def set_trade_data(self, input_data):
         self.stats_index, self.buy_flag, self.sell_flag = input_data
         
-    
-
+    # trade with all the stocks under this user
     def trade(self):
         print("trade start")
         
@@ -66,6 +65,7 @@ class user:
                 else: self.wb.place_order(stock = key, action = "SELL", orderType = "MKT", quant = real_quant)
         print("trade finished")
 
+    # write into a file with all the records
     def write_trade_record(self):
         f = open("./Data/trade_record.txt", "a")
         write_str = ''
@@ -77,7 +77,7 @@ class user:
         f.close()
 
 
-
+    # login to the webull real account
     def login_wb(self):
         fh = open(self.json_path, 'r')
         credential_data = json.load(fh)
@@ -101,6 +101,7 @@ class user:
         # important to get the account_id
         return self.wb.get_account_id()
 
+    # login to the webull paper trading account
     def login_pwb(self):
         fh = open(self.json_path, 'r')
         credential_data = json.load(fh)

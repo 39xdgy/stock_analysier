@@ -63,6 +63,7 @@ class stock_data:
 
     #---------------------------------------------------
 
+    # update the stock data to get the latest stock info
     def update_stock_data(self):
         self._stock_data = yf.download(tickers = self._stock_name, period = self._period, interval = self._intervial)
 
@@ -80,6 +81,8 @@ class stock_data:
         else:
             return False
     '''
+
+    # create the stats info and add it into the stock data
     def get_stats_info(self, info_list):
         try:
             stockStat = stockstats.StockDataFrame.retype(self._stock_data)
@@ -89,11 +92,13 @@ class stock_data:
         except:
             return False
 
+    # return the current price
     def get_current_price(self):
         return self._stock_data.at[self._stock_data.index[-1] ,'close']
 
 
-
+    # decide the result wheather the stock should be buy or not base on the flag that people give
+    # return a dictionary where all the result of the flags
     def should_buy(self):
         output = {}
         for key in self._buy_flag:
@@ -121,6 +126,9 @@ class stock_data:
 
         return output
 
+
+    # decide the result wheather the stock should be sell or not base on the flag that people give
+    # return a dictionary where all the result of the flags
     def should_sell(self):
         output = {}
         for key in self._sell_flag:

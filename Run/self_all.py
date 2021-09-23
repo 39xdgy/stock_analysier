@@ -54,6 +54,5 @@ schedule.every().thursday.at("15:45").do(long_user.trade)
 schedule.every().friday.at("15:45").do(long_user.trade)
 
 while True:
-    print("yo")
     schedule.run_pending()
     time.sleep(10)
