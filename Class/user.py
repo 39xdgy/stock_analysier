@@ -41,28 +41,30 @@ class user:
             each_stock = self._create_stock_info(key)
             should_buy = each_stock.should_buy()
             should_sell = each_stock.should_sell()
-            print(type(should_sell['kdjj']))
             quant = 10000 // each_stock.get_current_price()
-            print(each_stock.get_current_price())
             real_quant = 150 // each_stock.get_current_price()
             if value == 0 and should_buy['kdjj']:
                 new_td = td()
                 new_td.buy_update(name = key, start_time = str(datetime.now()), start_price = each_stock.get_current_price(), amount = quant)
                 self.trade_counter[key] = new_td
-                value = quant
+                self.stock_dic[key] = quant
                 
-                if self.is_pwb: self.pwb.place_order(stock = key, action = "BUY", orderType = "MKT", quant = quant)
-                else: self.wb.place_order(stock = key, action = "BUY", orderType = "MKT", quant = real_quant)
-            
+                if self.is_pwb: 
+                    self.stock_dic[key] = quant
+                    self.pwb.place_order(stock = key, action = "BUY", orderType = "MKT", enforce = "DAY", quant = quant)
+                else: 
+                    self.stock_dic[key] = real_quant
+                    self.wb.place_order(stock = key, action = "BUY", orderType = "MKT", enforce = "DAY", quant = real_quant)
+                print("buy")
 
-            #print(value)
-            if (not value == 0) and should_sell['kdjj']:
-                finished_td = self._trade_counter[key]
+            elif (not value == 0) and should_sell['kdjj']:
+                finished_td = self.trade_counter[key]
                 finished_td.sell_update(end_time = str(datetime.now()), end_price = each_stock.get_current_price())
                 self.trade_record.append(finished_td)
-                value = 0
-                if self.is_pwb: self.pwb.place_order(stock = key, action = "SELL", orderType = "MKT", quant = quant)
-                else: self.wb.place_order(stock = key, action = "SELL", orderType = "MKT", quant = real_quant)
+                self.stock_dic[key] = 0
+                if self.is_pwb: self.pwb.place_order(stock = key, action = "SELL", orderType = "MKT", enforce = "DAY", quant = value)
+                else: self.wb.place_order(stock = key, action = "SELL", orderType = "MKT", enforce = "DAY", quant = value)
+                print("sell")
         print("trade finished")
 
     # write into a file with all the records
