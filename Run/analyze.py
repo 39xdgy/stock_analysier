@@ -1,4 +1,4 @@
-f = open('all_stock_output.txt', 'r')
+f = open('../Data/all_stock_5m_output.txt', 'r')
 
 stock_info = {}
 each_stock = {}
@@ -38,7 +38,7 @@ for stock_name in list(stock_info.keys())[1:]:
         if loop_val > check_val:
             sorted_list = sorted_list[:i] + [stock_info[stock_name]] + sorted_list[i:]
             break
-    if len(sorted_list) > 20:
+    if len(sorted_list) > 10:
         sorted_list = sorted_list[:-1]
 
 sorted_name = []

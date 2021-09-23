@@ -6,7 +6,7 @@ from datetime import datetime
 import json
 class user:
 
-    def __init__(self, json_path, stock_dic, is_pwb = True):
+    def __init__(self, json_path, stock_dic, is_pwb = True, data_range = ['3d', '1m']):
         self.stock_dic = stock_dic
         self.json_path = json_path
         self.is_pwb = is_pwb
@@ -17,21 +17,21 @@ class user:
         self.sell_flag = {}
         self.trade_counter = {}
         self.trade_record = []
+        self.data_range = data_range
 
-
+    # helper function to get stock data
     def _create_stock_info(self, stock_name):
-        each_stock = stock_data(stock_name = stock_name)
+        each_stock = stock_data(stock_name = stock_name, period = self.data_range[0], interval = self.data_range[1])
         each_stock.set_buy_flag(self.buy_flag)
         each_stock.set_sell_flag(self.sell_flag)
         each_stock.get_stats_info(self.stats_index)
         return each_stock
 
-    
+    # set up all the trading flags and indexs
     def set_trade_data(self, input_data):
         self.stats_index, self.buy_flag, self.sell_flag = input_data
         
-    
-
+    # trade with all the stocks under this user
     def trade(self):
         print("trade start")
         
@@ -41,32 +41,35 @@ class user:
             each_stock = self._create_stock_info(key)
             should_buy = each_stock.should_buy()
             should_sell = each_stock.should_sell()
-            print(type(should_sell['kdjj']))
             quant = 10000 // each_stock.get_current_price()
-            print(each_stock.get_current_price())
-            real_quant = 1500 // each_stock.get_current_price()
+            real_quant = 150 // each_stock.get_current_price()
             if value == 0 and should_buy['kdjj']:
                 new_td = td()
                 new_td.buy_update(name = key, start_time = str(datetime.now()), start_price = each_stock.get_current_price(), amount = quant)
                 self.trade_counter[key] = new_td
-                value = quant
+                self.stock_dic[key] = quant
                 
-                if self.is_pwb: self.pwb.place_order(stock = key, action = "BUY", orderType = "MKT", quant = quant)
-                else: self.wb.place_order(stock = key, action = "BUY", orderType = "MKT", quant = real_quant)
-            
+                if self.is_pwb: 
+                    self.stock_dic[key] = quant
+                    self.pwb.place_order(stock = key, action = "BUY", orderType = "MKT", enforce = "DAY", quant = quant)
+                else: 
+                    self.stock_dic[key] = real_quant
+                    self.wb.place_order(stock = key, action = "BUY", orderType = "MKT", enforce = "DAY", quant = real_quant)
+                print("buy")
 
-            #print(value)
-            if (not value == 0) and should_sell['kdjj']:
-                finished_td = self._trade_counter[key]
+            elif (not value == 0) and should_sell['kdjj']:
+                finished_td = self.trade_counter[key]
                 finished_td.sell_update(end_time = str(datetime.now()), end_price = each_stock.get_current_price())
                 self.trade_record.append(finished_td)
-                value = 0
-                if self.is_pwb: self.pwb.place_order(stock = key, action = "SELL", orderType = "MKT", quant = quant)
-                else: self.wb.place_order(stock = key, action = "SELL", orderType = "MKT", quant = real_quant)
+                self.stock_dic[key] = 0
+                if self.is_pwb: self.pwb.place_order(stock = key, action = "SELL", orderType = "MKT", enforce = "DAY", quant = value)
+                else: self.wb.place_order(stock = key, action = "SELL", orderType = "MKT", enforce = "DAY", quant = value)
+                print("sell")
         print("trade finished")
 
+    # write into a file with all the records
     def write_trade_record(self):
-        f = open("./Data/trade_record.txt", "w")
+        f = open("./Data/trade_record.txt", "a")
         write_str = ''
         for record in self.trade_record:
             write_str += str(record)
@@ -76,7 +79,7 @@ class user:
         f.close()
 
 
-
+    # login to the webull real account
     def login_wb(self):
         fh = open(self.json_path, 'r')
         credential_data = json.load(fh)
@@ -100,6 +103,7 @@ class user:
         # important to get the account_id
         return self.wb.get_account_id()
 
+    # login to the webull paper trading account
     def login_pwb(self):
         fh = open(self.json_path, 'r')
         credential_data = json.load(fh)

@@ -9,6 +9,7 @@ class trade:
         self.amount = amount
         self.earning = earning
 
+
     def __str__(self):
         output_str = f'Stock name: {self.name}\n'
         output_str += f'\tStart time: {self.start_time} \tEnd time: {self.end_time}\n'
@@ -17,6 +18,7 @@ class trade:
 
         return output_str
 
+    # return all the trading record data
     def get_data(self):
         return {
             'name': self.name,
@@ -28,12 +30,14 @@ class trade:
             'earning': self.earning
         }
 
+    # update the record when a buy occur
     def buy_update(self, name, start_time, start_price, amount):
         self.name = name
         self.start_time = start_time
         self.start_price = start_price
         self.amount = amount
     
+    # update the record when a sell occur
     def sell_update(self, end_time, end_price):
         self.end_time = end_time
         self.end_price = end_price
