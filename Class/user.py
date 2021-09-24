@@ -8,6 +8,8 @@ class user:
 
     def __init__(self, json_path, stock_dic, is_pwb = True, data_range = ['3d', '1m']):
         self.stock_dic = stock_dic
+        with open("../Data/back_up.json", "w") as f:
+            json.dump(self.stock_dic, f)
         self.json_path = json_path
         self.is_pwb = is_pwb
         self.wb = webull()
@@ -34,9 +36,9 @@ class user:
     # trade with all the stocks under this user
     def trade(self):
         print("trade start")
-        
+        with open("../Data/backup.json", "r") as f:
+            self.stock_dic = json.load(f)
         for key in self.stock_dic:
-            print()
             value = self.stock_dic[key]
             each_stock = self._create_stock_info(key)
             should_buy = each_stock.should_buy()
@@ -65,11 +67,13 @@ class user:
                 if self.is_pwb: self.pwb.place_order(stock = key, action = "SELL", orderType = "MKT", enforce = "DAY", quant = value)
                 else: self.wb.place_order(stock = key, action = "SELL", orderType = "MKT", enforce = "DAY", quant = value)
                 print("sell")
+        with open("../Data/back_up.json", 'w') as f:
+            json.dump(self.stock_dic, f)
         print("trade finished")
 
     # write into a file with all the records
     def write_trade_record(self):
-        f = open("./Data/trade_record.txt", "a")
+        f = open("../Data/trade_record.txt", "a")
         write_str = ''
         for record in self.trade_record:
             write_str += str(record)
@@ -77,7 +81,6 @@ class user:
 
         f.write(write_str)
         f.close()
-
 
     # login to the webull real account
     def login_wb(self):
