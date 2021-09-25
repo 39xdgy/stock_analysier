@@ -33,37 +33,37 @@ class user:
         
     # trade with all the stocks under this user
     def trade(self):
-        print("trade start")
-        
         for key in self.stock_dic:
-            print()
-            value = self.stock_dic[key]
-            each_stock = self._create_stock_info(key)
-            should_buy = each_stock.should_buy()
-            should_sell = each_stock.should_sell()
-            print(type(should_sell['kdjj']))
-            quant = 10000 // each_stock.get_current_price()
-            print(each_stock.get_current_price())
-            real_quant = 150 // each_stock.get_current_price()
-            if value == 0 and should_buy['kdjj']:
-                new_td = td()
-                new_td.buy_update(name = key, start_time = str(datetime.now()), start_price = each_stock.get_current_price(), amount = quant)
-                self.trade_counter[key] = new_td
-                value = quant
+            try:
+                value = self.stock_dic[key]
+                each_stock = self._create_stock_info(key)
+                should_buy = each_stock.should_buy()
+                should_sell = each_stock.should_sell()
+                print(type(should_sell['kdjj']))
+                quant = 10000 // each_stock.get_current_price()
+                print(each_stock.get_current_price())
+                real_quant = 150 // each_stock.get_current_price()
+                if value == 0 and should_buy['kdjj']:
+                    new_td = td()
+                    new_td.buy_update(name = key, start_time = str(datetime.now()), start_price = each_stock.get_current_price(), amount = quant)
+                    self.trade_counter[key] = new_td
+                    value = quant
+                    
+                    if self.is_pwb: self.pwb.place_order(stock = key, action = "BUY", orderType = "MKT", quant = quant)
+                    else: self.wb.place_order(stock = key, action = "BUY", orderType = "MKT", quant = real_quant)
                 
-                if self.is_pwb: self.pwb.place_order(stock = key, action = "BUY", orderType = "MKT", quant = quant)
-                else: self.wb.place_order(stock = key, action = "BUY", orderType = "MKT", quant = real_quant)
-            
 
-            #print(value)
-            if (not value == 0) and should_sell['kdjj']:
-                finished_td = self._trade_counter[key]
-                finished_td.sell_update(end_time = str(datetime.now()), end_price = each_stock.get_current_price())
-                self.trade_record.append(finished_td)
-                value = 0
-                if self.is_pwb: self.pwb.place_order(stock = key, action = "SELL", orderType = "MKT", quant = quant)
-                else: self.wb.place_order(stock = key, action = "SELL", orderType = "MKT", quant = real_quant)
-        print("trade finished")
+                #print(value)
+                if (not value == 0) and should_sell['kdjj']:
+                    finished_td = self._trade_counter[key]
+                    finished_td.sell_update(end_time = str(datetime.now()), end_price = each_stock.get_current_price())
+                    self.trade_record.append(finished_td)
+                    value = 0
+                    if self.is_pwb: self.pwb.place_order(stock = key, action = "SELL", orderType = "MKT", quant = quant)
+                    else: self.wb.place_order(stock = key, action = "SELL", orderType = "MKT", quant = real_quant)
+            except Exception as E:
+                print(E)
+                continue
 
     # write into a file with all the records
     def write_trade_record(self):
