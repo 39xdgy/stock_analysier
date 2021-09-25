@@ -8,6 +8,8 @@ class user:
 
     def __init__(self, json_path, stock_dic, is_pwb = True, data_range = ['3d', '1m']):
         self.stock_dic = stock_dic
+        with open("../Data/back_up.json", "w") as f:
+            json.dump(self.stock_dic, f)
         self.json_path = json_path
         self.is_pwb = is_pwb
         self.wb = webull()
@@ -33,43 +35,44 @@ class user:
         
     # trade with all the stocks under this user
     def trade(self):
-        print("trade start")
-        
+        with open("../Data/backup.json", "r") as f:
+            self.stock_dic = json.load(f)
         for key in self.stock_dic:
-            print()
-            value = self.stock_dic[key]
-            each_stock = self._create_stock_info(key)
-            should_buy = each_stock.should_buy()
-            should_sell = each_stock.should_sell()
-            quant = 10000 // each_stock.get_current_price()
-            real_quant = 150 // each_stock.get_current_price()
-            if value == 0 and should_buy['kdjj']:
-                new_td = td()
-                new_td.buy_update(name = key, start_time = str(datetime.now()), start_price = each_stock.get_current_price(), amount = quant)
-                self.trade_counter[key] = new_td
-                self.stock_dic[key] = quant
-                
-                if self.is_pwb: 
+            try:
+                value = self.stock_dic[key]
+                each_stock = self._create_stock_info(key)
+                should_buy = each_stock.should_buy()
+                should_sell = each_stock.should_sell()
+                quant = 10000 // each_stock.get_current_price()
+                real_quant = 150 // each_stock.get_current_price()
+                if value == 0 and should_buy['kdjj']:
+                    new_td = td()
+                    new_td.buy_update(name = key, start_time = str(datetime.now()), start_price = each_stock.get_current_price(), amount = quant)
+                    self.trade_counter[key] = new_td
                     self.stock_dic[key] = quant
-                    self.pwb.place_order(stock = key, action = "BUY", orderType = "MKT", enforce = "DAY", quant = quant)
-                else: 
-                    self.stock_dic[key] = real_quant
-                    self.wb.place_order(stock = key, action = "BUY", orderType = "MKT", enforce = "DAY", quant = real_quant)
-                print("buy")
+                    
+                    if self.is_pwb: 
+                        self.stock_dic[key] = quant
+                        self.pwb.place_order(stock = key, action = "BUY", orderType = "MKT", enforce = "DAY", quant = quant)
+                    else: 
+                        self.stock_dic[key] = real_quant
+                        self.wb.place_order(stock = key, action = "BUY", orderType = "MKT", enforce = "DAY", quant = real_quant)
 
-            elif (not value == 0) and should_sell['kdjj']:
-                finished_td = self.trade_counter[key]
-                finished_td.sell_update(end_time = str(datetime.now()), end_price = each_stock.get_current_price())
-                self.trade_record.append(finished_td)
-                self.stock_dic[key] = 0
-                if self.is_pwb: self.pwb.place_order(stock = key, action = "SELL", orderType = "MKT", enforce = "DAY", quant = value)
-                else: self.wb.place_order(stock = key, action = "SELL", orderType = "MKT", enforce = "DAY", quant = value)
-                print("sell")
-        print("trade finished")
+                elif (not value == 0) and should_sell['kdjj']:
+                    finished_td = self.trade_counter[key]
+                    finished_td.sell_update(end_time = str(datetime.now()), end_price = each_stock.get_current_price())
+                    self.trade_record.append(finished_td)
+                    self.stock_dic[key] = 0
+                    if self.is_pwb: self.pwb.place_order(stock = key, action = "SELL", orderType = "MKT", enforce = "DAY", quant = value)
+                    else: self.wb.place_order(stock = key, action = "SELL", orderType = "MKT", enforce = "DAY", quant = value)
+            except Exception as E:
+                print(E)
+        with open("../Data/back_up.json", 'w') as f:
+            json.dump(self.stock_dic, f)
 
     # write into a file with all the records
     def write_trade_record(self):
-        f = open("./Data/trade_record.txt", "a")
+        f = open("../Data/trade_record.txt", "a")
         write_str = ''
         for record in self.trade_record:
             write_str += str(record)
@@ -77,7 +80,6 @@ class user:
 
         f.write(write_str)
         f.close()
-
 
     # login to the webull real account
     def login_wb(self):
