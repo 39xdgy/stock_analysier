@@ -3,13 +3,19 @@ from stock_data import stock_data
 from trade import trade as td
 from datetime import datetime
 
+import os.path
+
 import json
 class user:
 
     def __init__(self, json_path, stock_dic, is_pwb = True, data_range = ['3d', '1m']):
         self.stock_dic = stock_dic
-        with open("../Data/back_up.json", "w") as f:
-            json.dump(self.stock_dic, f)
+        if not os.path.exists("../Data/back_up.json"):
+            with open("../Data/back_up.json", "w") as f:
+                json.dump(self.stock_dic, f)
+        else: 
+            with open("../Data/back_up.json", "r") as f:
+                self.stock_dic = json.load(f)
         self.json_path = json_path
         self.is_pwb = is_pwb
         self.wb = webull()
@@ -35,8 +41,6 @@ class user:
         
     # trade with all the stocks under this user
     def trade(self):
-        with open("../Data/backup.json", "r") as f:
-            self.stock_dic = json.load(f)
         for key in self.stock_dic:
             try:
                 value = self.stock_dic[key]
