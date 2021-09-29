@@ -22,10 +22,10 @@ fail_list = []
 csv_list = pandas.read_csv('../Data/nasdaq_screener.csv')
 all_stock_list = csv_list[csv_list.columns[0]]
 start_time = dt.datetime.now()
-for each_stock in stock_list:
+for each_stock in all_stock_list:
     if '^' in each_stock or '/' in each_stock: continue
     try:
-        stock = stock_data(stock_name=each_stock, period = '1d')
+        stock = stock_data(stock_name=each_stock, period = '7d')
 
         stock.get_stats_info(stock_info)
 

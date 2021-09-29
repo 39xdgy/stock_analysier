@@ -32,7 +32,14 @@ class user:
     # set up all the trading flags and indexs
     def set_trade_data(self, input_data):
         self.stats_index, self.buy_flag, self.sell_flag = input_data
-        
+
+    # update the stock list
+    def update_stock_list(self, new_stock_dic):
+        for key in self.stock_dic:
+            if key in new_stock_dic:
+                new_stock_dic[key] = self.stock_dic[key]
+        self.stock_dic = new_stock_dic
+
     # trade with all the stocks under this user
     def trade(self):
         with open("../Data/backup.json", "r") as f:
