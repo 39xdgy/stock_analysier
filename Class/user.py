@@ -45,6 +45,8 @@ class user:
             if key in new_stock_dic:
                 new_stock_dic[key] = self.stock_dic[key]
         self.stock_dic = new_stock_dic
+        with open("../Data/back_up.json", "w") as f:
+                json.dump(self.stock_dic, f)
 
     # trade with all the stocks under this user
     def trade(self):
