@@ -1,7 +1,7 @@
 import json
-from webull import paper_webull # for real trading, import 'webull'
+from webull import paper_webull, webull # for real trading, import 'webull'
 
-wb = paper_webull()
+wb = webull()#paper_webull()
 
 
 fh = open('../Data/webull_credentials.json', 'r')
@@ -23,6 +23,7 @@ json.dump(credential_data, file)
 file.close()
 
 # important to get the account_id
-print(wb.get_account_id())
-
-print(wb.get_financials(stock = "AAPL"))
+#print(wb.get_account_id())
+print(wb.get_detail())
+#print(wb.get_account())
+print(wb.get_account())

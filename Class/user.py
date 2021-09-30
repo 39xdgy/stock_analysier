@@ -18,12 +18,8 @@ class user:
                 self.stock_dic = json.load(f)
         self.json_path = json_path
         self.is_pwb = is_pwb
-        self.wb = webull()
-        self.pwb = paper_webull()
-        self.stats_index = {}
-        self.buy_flag = {}
-        self.sell_flag = {}
-        self.trade_counter = {}
+        self.wb, self.pwb = webull(), paper_webull()
+        self.stats_index, self.buy_flag, self.sell_flag, self.trade_counter = {}, {}, {}, {}
         self.trade_record = []
         self.data_range = data_range
 
