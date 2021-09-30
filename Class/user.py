@@ -40,6 +40,11 @@ class user:
         for key in self.stock_dic:
             if key in new_stock_dic:
                 new_stock_dic[key] = self.stock_dic[key]
+            if not self.stock_dic[key] == 0:
+                if self.is_pwb: self.pwb.place_order(stock = key, action = "SELL", orderType = "MKT", enforce = "DAY", quant = self.stock_dic[key])
+                else: self.wb.place_order(stock = key, action = "SELL", orderType = "MKT", enforce = "DAY", quant = self.stock_dic[key])
+
+
         self.stock_dic = new_stock_dic
         with open("../Data/back_up.json", "w") as f:
                 json.dump(self.stock_dic, f)
