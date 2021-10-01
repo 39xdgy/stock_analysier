@@ -25,11 +25,11 @@ sell_flag = {'kdjj': 85}
 short_user.set_trade_data((stats_index, buy_flag, sell_flag))
 long_user.set_trade_data((stats_index, buy_flag, sell_flag))
 
-schedule.every().monday.at("09:28").do(short_user.trade)
-schedule.every().tuesday.at("09:28").do(short_user.trade)
-schedule.every().wednesday.at("09:28").do(short_user.trade)
-schedule.every().thursday.at("09:28").do(short_user.trade)
-schedule.every().friday.at("09:28").do(short_user.trade)
+schedule.every().monday.at("09:28").do(short_user.update_stock_list)
+schedule.every().tuesday.at("09:28").do(short_user.update_stock_list)
+schedule.every().wednesday.at("09:28").do(short_user.update_stock_list)
+schedule.every().thursday.at("09:28").do(short_user.update_stock_list)
+schedule.every().friday.at("09:28").do(short_user.update_stock_list)
 
 
 for m in range(30, 60):
