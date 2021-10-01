@@ -1,4 +1,5 @@
 import sys, schedule, time
+import datetime as dt
 
 sys.path.append('../Class/')
 from trade import trade
@@ -25,12 +26,6 @@ sell_flag = {'kdjj': 85}
 short_user.set_trade_data((stats_index, buy_flag, sell_flag))
 long_user.set_trade_data((stats_index, buy_flag, sell_flag))
 
-schedule.every().monday.at("09:28").do(short_user.trade)
-schedule.every().tuesday.at("09:28").do(short_user.trade)
-schedule.every().wednesday.at("09:28").do(short_user.trade)
-schedule.every().thursday.at("09:28").do(short_user.trade)
-schedule.every().friday.at("09:28").do(short_user.trade)
-
 
 for m in range(30, 60):
     tot_time = f'09:{str(m)}'
@@ -53,6 +48,13 @@ for h in range(10, 16):
         schedule.every().friday.at(tot_time).do(short_user.trade)
 
 
+schedule.every().monday.at("16:30").do(short_user.trade)
+schedule.every().tuesday.at("16:30").do(short_user.trade)
+schedule.every().wednesday.at("16:30").do(short_user.trade)
+schedule.every().thursday.at("16:30").do(short_user.trade)
+schedule.every().friday.at("16:30").do(short_user.trade)
+
+'''
 schedule.every().monday.at("15:45").do(long_user.trade)
 schedule.every().tuesday.at("15:45").do(long_user.trade)
 schedule.every().wednesday.at("15:45").do(long_user.trade)
@@ -61,6 +63,12 @@ schedule.every().friday.at("15:45").do(long_user.trade)
 
 schedule.every().saturday.at("15:00").do(long_user.login_wb)
 schedule.every().saturday.at("16:00").do(short_user.login_pwb)
+'''
+
+start = dt.datetime.now()
 while True:
     schedule.run_pending()
     time.sleep(10)
+    if(dt.datetime.now().hour == 16 and dt.datetime.now().minute > 15): break
+
+short_user.filter()

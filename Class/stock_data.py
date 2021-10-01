@@ -162,9 +162,9 @@ class stock_data:
 
 if __name__ == "__main__":
     #testing only
-    test = stock_data(stock_name="AAPL")
+    test = stock_data(stock_name="FRLN")
     print(test)
-    test.get_stats_info(['macd', 'macds', 'macdh', 'kdjk', 'kdjd', 'kdjj', 'rsi_6', 'rsi_12', 'rsi_14'])
+    test.get_stats_info(['kdjj'])
     test.set_buy_flag({'kdjj': 15})
     test.set_sell_flag({'kdjj': 85})
     
