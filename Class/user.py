@@ -3,9 +3,9 @@ from stock_data import stock_data
 from trade import trade as td
 from datetime import datetime
 
-import os.path
+import os.path, json, pandas
 
-import json
+
 class user:
 
     def __init__(self, json_path, stock_dic, is_pwb = True, data_range = ['3d', '1m']):
@@ -22,6 +22,7 @@ class user:
         self.stats_index, self.buy_flag, self.sell_flag, self.trade_counter = {}, {}, {}, {}
         self.trade_record = []
         self.data_range = data_range
+        self.next_day_dic = {}
 
     # helper function to get stock data
     def _create_stock_info(self, stock_name):
@@ -36,18 +37,119 @@ class user:
         self.stats_index, self.buy_flag, self.sell_flag = input_data
 
     # update the stock list
-    def update_stock_list(self, new_stock_dic):
+    def update_stock_list(self):
+        if len(self.next_day_dic.keys()) == 0:
+            return
         for key in self.stock_dic:
-            if key in new_stock_dic:
-                new_stock_dic[key] = self.stock_dic[key]
-            if not self.stock_dic[key] == 0:
-                if self.is_pwb: self.pwb.place_order(stock = key, action = "SELL", orderType = "MKT", enforce = "DAY", quant = self.stock_dic[key])
-                else: self.wb.place_order(stock = key, action = "SELL", orderType = "MKT", enforce = "DAY", quant = self.stock_dic[key])
+            if key in self.next_day_dic:
+                self.next_day_dic[key] = self.stock_dic[key]
+            elif not self.stock_dic[key] == 0:
+                if self.is_pwb: self.pwb.place_order(stock = key, action = "SELL", orderType = "LMT", enforce = "DAY", quant = self.stock_dic[key])
+                else: self.wb.place_order(stock = key, action = "SELL", orderType = "LMT", enforce = "DAY", quant = self.stock_dic[key])
 
-
-        self.stock_dic = new_stock_dic
+        self.stock_dic = self.next_day_dic
         with open("../Data/back_up.json", "w") as f:
                 json.dump(self.stock_dic, f)
+
+    def simulation_2_filter(self):
+        csv_list = pandas.read_csv('../Data/nasdaq_screener.csv')
+        all_stocks_ticker = csv_list[csv_list.columns[0]]
+        success_list = []
+        pass_stock = {}
+        for ticker in all_stocks_ticker:
+            if '^' in ticker or '/' in ticker: continue
+            try:
+                stock = stock_data(stock_name=ticker, period = '7d')
+                stock.get_stats_info(['kdjj'])
+                time_diff, time_sum, stock_num, base_value = 0, 0, 0, 10000
+                time_tracker = [-1, -1]
+                flag, sell_flag = True, False
+
+                buy_value, trade_count, fail_count, value_record = 0, 0, 0, 10000
+                temp_price = 0.0
+                
+                for index, row in stock.get_stock_data().iterrows():
+                    
+                    if flag and row['kdjj'] < 15:
+                        
+                        flag, sell_flag = False, True
+                        trade_count += 0.5
+                        time_diff += 1
+
+                        temp_price = row['close']
+                        stock_num = base_value // row['close']
+                        base_value -= stock_num * row['close']
+                    elif sell_flag:
+                        if (row['kdjj'] > 85):
+                            trade_count += 0.5
+                            flag, sell_flag = True, False
+                            
+                            if time_tracker[0] == -1:
+                                time_tracker[0] = time_diff
+                                time_tracker[1] = time_diff
+
+                            if time_diff < time_tracker[0]: time_tracker[0] = time_diff
+                            if time_diff > time_tracker[1]: time_tracker[1] = time_diff
+
+                            time_sum += time_diff
+                            base_value += stock_num * row['close']
+                            time_diff, stock_num = 0, 0
+                            if value_record > base_value: fail_count += 1
+                            value_record = base_value
+                        else: time_diff += 1
+                
+                if stock_num != 0:
+                    base_value += stock.get_current_price() * stock_num
+                
+                if fail_count / trade_count <= 0.5 and trade_count >= 5 and base_value > 10000:
+                    pass_stock[ticker] = {
+                        'name': ticker,
+                        'final_value': base_value,
+                        'trade_count': trade_count,
+                        'fail_chance': fail_count / trade_count,
+                        'avg_day': time_sum / trade_count,
+                        'short_mins': time_tracker[0],
+                        'long_mins': time_tracker[1]
+                    }
+                total_outcome += base_value
+
+                success_list.append(ticker)
+            except Exception as e:
+                continue
+
+        sorted_list = [pass_stock[list(pass_stock.keys())[0]]]
+        sort_key = 'fail_chance'
+
+        for stock_name in list(pass_stock.keys())[1:]:
+            last_val = sorted_list[-1][sort_key]
+            check_val = pass_stock[stock_name][sort_key]
+            if check_val > last_val:
+                continue
+            for i in range(0, len(sorted_list)):
+                loop_val = sorted_list[i][sort_key]
+                if loop_val > check_val:
+                    sorted_list = sorted_list[:i] + [pass_stock[stock_name]] + sorted_list[i:]
+                    break
+            if len(sorted_list) > 10:
+                sorted_list = sorted_list[:-1]
+
+        sorted_name = []
+        
+        self.next_day_dic = {stock["name"]: 0 for stock in sorted_list}
+        return self.next_day_dic
+        
+        '''
+        for stock in sorted_list:
+            #print(stock)
+            print(f'stock: {stock["name"]}\t count: {stock["trade_count"]}\t fail: {stock[sort_key]}\n')
+            sorted_name = stock["name"]
+            #print()
+        '''
+        
+
+
+
+
 
     # trade with all the stocks under this user
     def trade(self):
@@ -155,8 +257,6 @@ if __name__ == "__main__":
     test_user = user("../Data/webull_credentials.json", stock_dic)
     wb_id = test_user.login_wb()
     pwb_id = test_user.login_pwb()
-    #print(wb_id)
-    #print(pwb_id)
 
 
     stats_index = ['kdjj']
@@ -164,14 +264,6 @@ if __name__ == "__main__":
     sell_flag = {'kdjj': 85}
     test_user.set_trade_data((stats_index, buy_flag, sell_flag))
     #schedule.every().saturday.at("14:42").do(test_user.trade)
-    test_user.trade()
+    print(test_user.simulation_2_filter())
 
-    #test_user.trade()
-
-    '''
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
-        #print("still going")
-    '''
     
