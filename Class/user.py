@@ -101,7 +101,7 @@ class user:
                 if stock_num != 0:
                     base_value += stock.get_current_price() * stock_num
                 
-                if fail_count / trade_count <= 0.5 and trade_count >= 5 and base_value > 10000:
+                if fail_count / trade_count <= 0.2 and trade_count >= 35 and base_value > 10350:
                     pass_stock[ticker] = {
                         'name': ticker,
                         'final_value': base_value,
@@ -117,6 +117,9 @@ class user:
             except Exception as e:
                 continue
 
+        with open("../Data/success.json", "w") as f:
+                json.dump(success_list, f)
+        print(success_list)
         sorted_list = [pass_stock[list(pass_stock.keys())[0]]]
         sort_key = 'fail_chance'
 
