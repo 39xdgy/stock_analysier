@@ -23,6 +23,7 @@ class user:
         self.trade_record = []
         self.data_range = data_range
         self.next_day_dic = {}
+        self.memory = []
 
     # helper function to get stock data
     def _create_stock_info(self, stock_name):
@@ -41,11 +42,10 @@ class user:
         if len(self.next_day_dic.keys()) == 0:
             return
         for key in self.stock_dic:
-            if key in self.next_day_dic:
+            if self.stock_dic[key] != 0:
+                if key not in self.next_day_dic:
+                    self.memory.append(key)
                 self.next_day_dic[key] = self.stock_dic[key]
-            elif not self.stock_dic[key] == 0:
-                if self.is_pwb: self.pwb.place_order(stock = key, action = "SELL", orderType = "LMT", enforce = "DAY", quant = self.stock_dic[key])
-                else: self.wb.place_order(stock = key, action = "SELL", orderType = "LMT", enforce = "DAY", quant = self.stock_dic[key])
 
         self.stock_dic = self.next_day_dic
         with open("../Data/back_up.json", "w") as f:
@@ -139,7 +139,6 @@ class user:
         sorted_name = []
         
         self.next_day_dic = {stock["name"]: 0 for stock in sorted_list}
-        return self.next_day_dic
         
         '''
         for stock in sorted_list:
@@ -184,6 +183,9 @@ class user:
                     self.stock_dic[key] = 0
                     if self.is_pwb: self.pwb.place_order(stock = key, action = "SELL", orderType = "MKT", enforce = "DAY", quant = value)
                     else: self.wb.place_order(stock = key, action = "SELL", orderType = "MKT", enforce = "DAY", quant = value)
+                    if(key in self.memory):
+                        del self.memory[key]
+                        del self.stock_dic[key]
             except Exception as E:
                 print(E)
         with open("../Data/back_up.json", 'w') as f:

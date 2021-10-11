@@ -20,11 +20,7 @@ sell_flag = {'kdjj': 85}
 
 short_user.set_trade_data((stats_index, buy_flag, sell_flag))
 
-schedule.every().monday.at("09:29").do(short_user.update_stock_list)
-schedule.every().tuesday.at("09:29").do(short_user.update_stock_list)
-schedule.every().wednesday.at("09:29").do(short_user.update_stock_list)
-schedule.every().thursday.at("09:29").do(short_user.update_stock_list)
-schedule.every().friday.at("09:29").do(short_user.update_stock_list)
+
 
 
 for m in range(30, 60):
@@ -53,6 +49,12 @@ schedule.every().tuesday.at("17:00").do(short_user.simulation_2_filter)
 schedule.every().wednesday.at("17:00").do(short_user.simulation_2_filter)
 schedule.every().thursday.at("17:00").do(short_user.simulation_2_filter)
 schedule.every().friday.at("17:00").do(short_user.simulation_2_filter)
+
+schedule.every().monday.at("22:00").do(short_user.update_stock_list)
+schedule.every().tuesday.at("22:00").do(short_user.update_stock_list)
+schedule.every().wednesday.at("22:00").do(short_user.update_stock_list)
+schedule.every().thursday.at("22:00").do(short_user.update_stock_list)
+schedule.every().friday.at("22:00").do(short_user.update_stock_list)
 
 while True:
     schedule.run_pending()
