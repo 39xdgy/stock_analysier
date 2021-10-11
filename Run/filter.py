@@ -5,9 +5,7 @@ import pandas
 sys.path.append('../Class/')
 from stock_data import stock_data
 
-
-stock_info = ['kdjj']#['macd', 'macds', 'macdh', 'kdjk', 'kdjd', 'kdjj', 'rsi_6', 'rsi_12', 'rsi_14']
-
+stock_info = ['kdjj']
 write_info = f'Top 20 \n\n'
 success_list = []
 csv_list = pandas.read_csv('../Data/nasdaq_screener.csv')
@@ -17,7 +15,7 @@ pass_stock = {}
 for each_stock in all_stock_list:
     if '^' in each_stock or '/' in each_stock: continue
     try:
-        stock = stock_data(stock_name=each_stock, period = '1d')
+        stock = stock_data(stock_name=each_stock, period = '7d')
 
         stock.get_stats_info(stock_info)
         
@@ -85,14 +83,9 @@ for each_stock in all_stock_list:
                 'trade_count': trade_count,
                 'fail_chance': fail_count / trade_count,
                 'avg_day': time_sum / trade_count,
-                'short_mins': time_tracker[0]
+                'short_mins': time_tracker[0],
                 'long_mins': time_tracker[1]
             }
-            '''
-            write_info += f'{each_stock} \t 10000 -> {base_value}\n'
-            write_info += f'{trade_count} \t {fail_count / trade_count}% of fail\n'
-            write_info += f'{time_sum / trade_count} \t {str(time_tracker)}\n\n'
-            '''
         
         total_outcome += base_value
 
@@ -100,40 +93,8 @@ for each_stock in all_stock_list:
     except Exception as e:
         print(f'{each_stock} has error because of {e}')
 
-'''
-f = open("/../data/all_stock_5m_output.txt", "w")
-f.write(write_info)
-f.close()
-'''
 
-'''
-f = open('../Data/all_stock_5m_output.txt', 'r')
 
-pass_stock = {}
-each_stock = {}
-
-for line in f:
-    info = line.split(" ")
-    
-    if "->" in line:
-        #print(float(info[-1][:-1]))
-        each_stock['name'] = info[0]
-        each_stock['final_value'] = float(info[-1][:-1])
-    if "%" in line:
-        #print(info)
-        each_stock['trade_count'] = float(info[0])
-        each_stock['fail_chance'] = float(info[2][:-1])
-    if "[" in line:
-        #print(info[-1][:-1])
-        each_stock['avg_day'] = float(info[0])
-        each_stock['short_day'] = int(info[-2][1:-1])
-        each_stock['long_day'] = int(info[-1][:-2])
-        stock_info[each_stock['name']] = each_stock
-        each_stock = {}
-
-#print(len(stock_info))
-#print(list(stock_info.keys())[0])
-'''
 sorted_list = [pass_stock[list(pass_stock.keys())[0]]]
 sort_key = 'fail_chance'
 
@@ -157,9 +118,3 @@ for stock in sorted_list:
     print(f'stock: {stock["name"]}\t count: {stock["trade_count"]}\t fail: {stock[sort_key]}\n')
     sorted_name = stock["name"]
     #print()
-
-'''
-f = open('../Data/top_20_output.txt', 'w')
-f.write(str(sorted_list))
-f.close()
-'''
