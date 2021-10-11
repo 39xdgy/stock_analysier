@@ -44,11 +44,11 @@ for h in range(10, 16):
         schedule.every().friday.at(tot_time).do(short_user.trade)
 
 
-schedule.every().monday.at("17:00").do(short_user.simulation_2_filter)
-schedule.every().tuesday.at("17:00").do(short_user.simulation_2_filter)
-schedule.every().wednesday.at("17:00").do(short_user.simulation_2_filter)
-schedule.every().thursday.at("17:00").do(short_user.simulation_2_filter)
-schedule.every().friday.at("17:00").do(short_user.simulation_2_filter)
+schedule.every().monday.at("18:00").do(short_user.simulation_2_filter)
+schedule.every().tuesday.at("18:00").do(short_user.simulation_2_filter)
+schedule.every().wednesday.at("18:00").do(short_user.simulation_2_filter)
+schedule.every().thursday.at("18:00").do(short_user.simulation_2_filter)
+schedule.every().friday.at("18:00").do(short_user.simulation_2_filter)
 
 schedule.every().monday.at("22:00").do(short_user.update_stock_list)
 schedule.every().tuesday.at("22:00").do(short_user.update_stock_list)
