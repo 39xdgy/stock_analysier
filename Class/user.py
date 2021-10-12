@@ -184,7 +184,7 @@ class user:
                     if self.is_pwb: self.pwb.place_order(stock = key, action = "SELL", orderType = "MKT", enforce = "DAY", quant = value)
                     else: self.wb.place_order(stock = key, action = "SELL", orderType = "MKT", enforce = "DAY", quant = value)
                     if(key in self.memory):
-                        del self.memory[key]
+                        del self.memory[self.memory.index(key)]
                         del self.stock_dic[key]
             except Exception as E:
                 print(E)
