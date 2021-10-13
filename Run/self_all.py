@@ -20,9 +20,6 @@ sell_flag = {'kdjj': 85}
 
 short_user.set_trade_data((stats_index, buy_flag, sell_flag))
 
-
-
-
 for m in range(30, 60):
     tot_time = f'09:{str(m)}'
     schedule.every().monday.at(tot_time).do(short_user.trade)

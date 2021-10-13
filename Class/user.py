@@ -178,9 +178,9 @@ class user:
                         self.wb.place_order(stock = key, action = "BUY", orderType = "MKT", enforce = "DAY", quant = real_quant)
 
                 elif (not value == 0) and should_sell['kdjj']:
-                    finished_td = self.trade_counter[key]
-                    finished_td.sell_update(end_time = str(datetime.now()), end_price = each_stock.get_current_price())
-                    self.trade_record.append(finished_td)
+                    #finished_td = self.trade_counter[key]
+                    #finished_td.sell_update(end_time = str(datetime.now()), end_price = each_stock.get_current_price())
+                    #self.trade_record.append(finished_td)
                     self.stock_dic[key] = 0
                     if self.is_pwb: self.pwb.place_order(stock = key, action = "SELL", orderType = "MKT", enforce = "DAY", quant = value)
                     else: self.wb.place_order(stock = key, action = "SELL", orderType = "MKT", enforce = "DAY", quant = value)
@@ -272,4 +272,3 @@ if __name__ == "__main__":
     #schedule.every().saturday.at("14:42").do(test_user.trade)
     print(test_user.simulation_2_filter())
 
-    
