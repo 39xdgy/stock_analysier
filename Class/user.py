@@ -155,7 +155,8 @@ class user:
 
     # trade with all the stocks under this user
     def trade(self):
-        for key in self.stock_dic:
+        ticker_place_holder = [ticker for ticker in self.stock_dic]
+        for key in ticker_place_holder:
             try:
                 value = self.stock_dic[key]
                 each_stock = self._create_stock_info(key)
