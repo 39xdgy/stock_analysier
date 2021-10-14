@@ -16,9 +16,10 @@ pip install -r requirement.txt
 
 ## 如何使用
 
-首先要在这个repo里面创造一个文件夹叫做Data用来储存所有文件以及数据。然后在里面创建一个json文件叫做webull_credentials.json。具体储存什么内容请查看helps里面的连接
+首先要在这个repo里面创造一个叫做Data的文件夹用来储存所有文件以及数据，然后在该文件夹内创建一个名为webull_credentials.json的json文件。具体储存什么内容请查看帮助里面的连接
 
-当你把上述内容全部完成之后，可以直接进入Run文件夹然后运行self_main.py来使用我为了自己所开发的指标/股票。
+当你把上述内容全部完成之后，可以直接进入Run文件夹然后运行self_main.py来使用我为自己所创建自动交易脚本。
+
 
 ### TODO
 * 使用trade class来记录所有交易

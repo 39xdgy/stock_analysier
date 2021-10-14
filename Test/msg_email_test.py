@@ -1,4 +1,9 @@
 import smtplib, json
+import datetime as dt
+
+
+print(type(dt.datetime.today().hour))
+
 
 fh = open("../Data/email_data.json", "r")
 email_data = json.load(fh)

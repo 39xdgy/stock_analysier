@@ -1,5 +1,5 @@
 import json
-from webull import paper_webull # for real trading, import 'webull'
+from webull import paper_webull, webull # for real trading, import 'webull'
 
 wb = paper_webull()
 
@@ -23,6 +23,9 @@ json.dump(credential_data, file)
 file.close()
 
 # important to get the account_id
-print(wb.get_account_id())
+#print(wb.get_account_id())
+print(wb.get_detail())
+#print(wb.get_account())
+print(wb.get_account())
 
-print(wb.get_financials(stock = "AAPL"))
+print(wb.place_order(stock = "AAPL", action = "BUY", orderType = "MKT", enforce = "DAY", quant = 2))
