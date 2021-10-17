@@ -24,6 +24,12 @@ class user:
         self.data_range = data_range
         self.next_day_dic = {}
         self.memory = []
+        if not os.path.exists("../Data/memory.json"):
+            with open("../Data/memory.json", "w") as f:
+                json.dump(self.memory, f)
+        else: 
+            with open("../Data/memory.json", "r") as f:
+                self.memory = json.load(f)
 
     # helper function to get stock data
     def _create_stock_info(self, stock_name):
@@ -49,7 +55,10 @@ class user:
 
         self.stock_dic = self.next_day_dic
         with open("../Data/back_up.json", "w") as f:
-                json.dump(self.stock_dic, f)
+            json.dump(self.stock_dic, f)
+
+        with open("../Data/memory.json", 'w') as f:
+            json.dump(self.memory, f)
 
     def simulation_2_filter(self):
         csv_list = pandas.read_csv('../Data/nasdaq_screener.csv')
@@ -117,6 +126,7 @@ class user:
             except Exception as e:
                 continue
 
+
         with open("../Data/success.json", "w") as f:
                 json.dump(success_list, f)
         print(success_list)
@@ -140,13 +150,6 @@ class user:
         
         self.next_day_dic = {stock["name"]: 0 for stock in sorted_list}
         
-        '''
-        for stock in sorted_list:
-            #print(stock)
-            print(f'stock: {stock["name"]}\t count: {stock["trade_count"]}\t fail: {stock[sort_key]}\n')
-            sorted_name = stock["name"]
-            #print()
-        '''
         
 
 
@@ -187,10 +190,15 @@ class user:
                     if(key in self.memory):
                         del self.memory[self.memory.index(key)]
                         del self.stock_dic[key]
+                        with open("../Data/memory.json", 'w') as f:
+                            json.dump(self.memory, f)
+
             except Exception as E:
                 print(E)
         with open("../Data/back_up.json", 'w') as f:
             json.dump(self.stock_dic, f)
+        
+        
 
     # write into a file with all the records
     def write_trade_record(self):
