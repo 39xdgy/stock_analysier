@@ -19,14 +19,13 @@ Very old school lol
 
 You have to create a "Data" folder to host all your data. Inside that folder, you will have to have the file "webull_credentials.json" to host all your data for webull login. About the detail of that file, please check the link in the help section. 
 
-After you create the folder with the file inside. just go to the "Run" folder and run the file "self_main.py" for the auto trading that created for myself.
+After you create the folder with the file inside. just go to the "Run" folder and run the file "self_all.py" for the auto trading that created for myself.
+
+Also, You will need to download the [stock ticker](https://www.nasdaq.com/market-activity/stocks/screener) into the Data folder.
 
 ### TODO
-* Add trade record into the user (finished code, need testing)
-* Add Japanese readme
-* make it more user interactive with all the rules
-* add comments in my code(Sorry I will try my best to make it better)
 
+Everything is on my Trello Board and you can check what I am up to from [here](https://trello.com/b/6WNh1HhC/stock-applications). 
 
 ### Helps
 
