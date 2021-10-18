@@ -2,7 +2,7 @@ import sys, schedule, time
 
 sys.path.append('../Class/')
 from trade import trade
-from user import user
+from wb_user import wb_user
 
 short_stock_list = ["FRLN", "SALM", "ADMA", "IVR", "NBY", "AVD", "STVN", "GGPI", "SOGO", "GPOR"]
 #print(len(stock_list))
@@ -10,7 +10,7 @@ long_stock_dic, short_stock_dic = {}, {}
 
 #for key in long_stock_list: long_stock_dic[key] = 0
 short_stock_dic = {key: 0 for key in short_stock_list}
-short_user = user(json_path = "../Data/webull_credentials.json", stock_dic = short_stock_dic)
+short_user = wb_user(json_path = "../Data/webull_credentials.json", stock_dic = short_stock_dic)
 
 short_user.login_pwb()
 
