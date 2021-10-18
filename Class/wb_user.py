@@ -6,7 +6,7 @@ from datetime import datetime
 import os.path, json, pandas
 
 
-class user:
+class wb_user:
 
     def __init__(self, json_path, stock_dic, is_pwb = True, data_range = ['3d', '1m']):
         self.stock_dic = stock_dic
@@ -268,7 +268,7 @@ if __name__ == "__main__":
     for key in stock_list:
         stock_dic[key] = 0
 
-    test_user = user("../Data/webull_credentials.json", stock_dic)
+    test_user = wb_user("../Data/webull_credentials.json", stock_dic)
     wb_id = test_user.login_wb()
     pwb_id = test_user.login_pwb()
 
