@@ -2,27 +2,27 @@ import ftplib
 import os
 import re
 import yfinance as yf
-'''
+
 # Connect to ftp.nasdaqtrader.com
 ftp = ftplib.FTP('ftp.nasdaqtrader.com', 'anonymous', 'anonymous@debian.org')
  
 # Download files nasdaqlisted.txt and otherlisted.txt from ftp.nasdaqtrader.com
 for ficheiro in ["nasdaqlisted.txt", "otherlisted.txt"]:
         ftp.cwd("/SymbolDirectory")
-        localfile = open(ficheiro, 'wb')
+        localfile = open(f'../Data/{ficheiro}', 'wb')
         ftp.retrbinary('RETR ' + ficheiro, localfile.write)
         localfile.close()
 ftp.quit()
  
 # Grep for common stock in nasdaqlisted.txt and otherlisted.txt
 for ficheiro in ["nasdaqlisted.txt", "otherlisted.txt"]:
-        localfile = open(ficheiro, 'r')
+        localfile = open(f'../Data/{ficheiro}', 'r')
         for line in localfile:
                 if re.search("Common Stock", line):
                         ticker = line.split("|")[0]
                         # Append tickers to file tickers.txt
-                        open("tickers.txt","a+").write(ticker + "\n")
-'''
+                        open("../Data/tickers.txt","a+").write(ticker + "\n")
+
 
 tickers = ''
 with open('tickers.txt', 'r') as f:
@@ -62,7 +62,8 @@ for each_line in lines:
 
 
 print(len(tickers))
-'''
-for each_ticker in other_list:
-    _ = yf.download(each_ticker)
-'''
+
+all_tickers_str = ' '.join(tickers)
+
+test_read_all = yf.download(all_tickers_str)
+print(test_read_all)
