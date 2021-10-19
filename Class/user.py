@@ -88,6 +88,7 @@ class user:
                     if self._check_if_ticker_in_list(ticker):
                         self.all_stocks_ticker.append(ticker)
 
+
     def simulation_2_filter(self):
         pass_stock = {}
         for ticker in self.all_stocks_ticker:
@@ -171,10 +172,6 @@ class user:
         self.next_day_dic = {stock["name"]: 0 for stock in sorted_list}
         
         
-
-
-
-
 
     # trade with all the stocks under this user
     def trade(self):
@@ -298,5 +295,6 @@ if __name__ == "__main__":
     sell_flag = {'kdjj': 85}
     test_user.set_trade_data((stats_index, buy_flag, sell_flag))
     #schedule.every().saturday.at("14:42").do(test_user.trade)
-    print(test_user.simulation_2_filter())
+    test_user.create_all_stock_tickers()
+    test_user.simulation_2_filter()
 
