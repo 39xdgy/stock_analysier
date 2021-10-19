@@ -250,6 +250,8 @@ if __name__ == "__main__":
     sell_flag = {'kdjj': 85}
     test_user.set_trade_data((stats_index, buy_flag, sell_flag))
 
+    
+
     test_user.logout()
 
 
