@@ -3,7 +3,7 @@ from stock_data import stock_data
 from trade import trade as td
 from datetime import datetime
 
-import os.path, json, pandas
+import os.path, json, pandas, ftplib
 
 
 class user:
@@ -23,6 +23,7 @@ class user:
         self.trade_record = []
         self.data_range = data_range
         self.next_day_dic = {}
+        self.all_stocks_ticker = []
         self.memory = []
         if not os.path.exists("../Data/memory.json"):
             with open("../Data/memory.json", "w") as f:
@@ -60,12 +61,36 @@ class user:
         with open("../Data/memory.json", 'w') as f:
             json.dump(self.memory, f)
 
+    def _check_if_ticker_in_list(self, ticker) -> bool:
+        return 'File Creation Time' not in ticker and 'Symbol' not in ticker and "$" not in ticker and "." not in ticker and ticker not in self.all_stocks_ticker
+
+    def create_all_stock_tickers(self):
+        ftp = ftplib.FTP('ftp.nasdaqtrader.com', 'anonymous', 'anonymous@debian.org')
+        
+        # Download files nasdaqlisted.txt and otherlisted.txt from ftp.nasdaqtrader.com
+        for ficheiro in ["nasdaqlisted.txt", "otherlisted.txt"]:
+                ftp.cwd("/SymbolDirectory")
+                localfile = open(f'../Data/{ficheiro}', 'wb')
+                ftp.retrbinary('RETR ' + ficheiro, localfile.write)
+                localfile.close()
+        ftp.quit()
+        
+        # Grep for common stock in nasdaqlisted.txt and otherlisted.txt
+
+        self.all_stocks_ticker = []
+
+        for ficheiro in ["nasdaqlisted.txt", "otherlisted.txt"]:
+                localfile = open(f'../Data/{ficheiro}', 'r')
+                open("../Data/tickers.txt", "w")
+                for line in localfile:
+                    #print(line)
+                    ticker = line.split("|")[0]
+                    if self._check_if_ticker_in_list(ticker):
+                        self.all_stocks_ticker.append(ticker)
+
     def simulation_2_filter(self):
-        csv_list = pandas.read_csv('../Data/nasdaq_screener.csv')
-        all_stocks_ticker = csv_list[csv_list.columns[0]]
-        success_list = []
         pass_stock = {}
-        for ticker in all_stocks_ticker:
+        for ticker in self.all_stocks_ticker:
             if '^' in ticker or '/' in ticker: continue
             try:
                 stock = stock_data(stock_name=ticker, period = '7d')
@@ -122,14 +147,9 @@ class user:
                     }
                 total_outcome += base_value
 
-                success_list.append(ticker)
             except Exception as e:
                 continue
 
-
-        with open("../Data/success.json", "w") as f:
-                json.dump(success_list, f)
-        print(success_list)
         sorted_list = [pass_stock[list(pass_stock.keys())[0]]]
         sort_key = 'fail_chance'
 
