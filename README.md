@@ -21,8 +21,6 @@ You have to create a "Data" folder to host all your data. Inside that folder, yo
 
 After you create the folder with the file inside. just go to the "Run" folder and run the file "self_all.py" for the auto trading that created for myself.
 
-Also, You will need to download the [stock ticker](https://www.nasdaq.com/market-activity/stocks/screener) into the Data folder.
-
 ### TODO
 
 Everything is on my Trello Board and you can check what I am up to from [here](https://trello.com/b/6WNh1HhC/stock-applications). 
