@@ -70,17 +70,6 @@ class stock_data:
     def write_to_json(self):
         self._stock_data.to_json(self._stock_name + '.json')
 
-    '''
-    def read_from_json(self, file_path) -> bool:
-        if os.path.isfile(file_path):
-            self._stock_name = file_path.split("/")[-1][:-5]
-            self._stock_data = pd.read_json(file_path)
-            self._start_date = self._stock_data.index[0]
-            self._end_date = self._stock_data.index[-1]
-            return True
-        else:
-            return False
-    '''
 
     # create the stats info and add it into the stock data
     def get_stats_info(self, info_list):

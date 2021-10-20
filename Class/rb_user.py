@@ -186,7 +186,7 @@ class rb_user:
                     new_td.buy_update(name = key, start_time = str(datetime.now()), start_price = each_stock.get_current_price(), amount = quant)
                     self.trade_counter[key] = new_td
                     self.stock_dic[key] = quant
-                    # TODO change buy system
+                    
                     self.stock_dic[key] = real_quant
                     rh.order_buy_market(key, real_quant)
                     
@@ -195,7 +195,7 @@ class rb_user:
                     #finished_td.sell_update(end_time = str(datetime.now()), end_price = each_stock.get_current_price())
                     #self.trade_record.append(finished_td)
                     self.stock_dic[key] = 0
-                    # TODO change buy system
+                    
                     rh.order_buy_market(key, value)
                     if(key in self.memory):
                         del self.memory[self.memory.index(key)]
@@ -225,7 +225,7 @@ class rb_user:
         user_data = {}
         with open(self.json_path, 'r') as f:
             user_data = json.load(f)
-        #print(user_data)
+            
         totp = pyotp.TOTP(user_data['token']).now()
         print("Please check your message on your phone for your validation code!")
         login = rh.login(user_data['user'], user_data['pwd'], mfa_code=totp)

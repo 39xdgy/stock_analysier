@@ -13,17 +13,13 @@ today = dt.datetime.today().strftime('%Y-%m-%d')
 #print(start)
 stock_info = ['kdjj']#['macd', 'macds', 'macdh', 'kdjk', 'kdjd', 'kdjj', 'rsi_6', 'rsi_12', 'rsi_14']
 
-stock_list = ["AAPL", "SBUX", "ZM", "TWTR", "GME", "DIS", "V", "INTC", "NVDA", "LYFT", "AMRN"]
-stock_list += ["TTE", "SGOC", "CPK", "HQI", "TDAC", "NXPI", "AB", "FIVN", "SILV", "HUBS"]
-stock_list = ['FRLN', 'SALM', 'ADMA', 'IVR', 'NBY', 'AVD', 'STVN', 'GGPI', 'SOGO', 'GPOR']
-stock_list = ['CEI']
 write_info = f'Top 20 \n\n'
 total_outcome = 0
 fail_list = []
 csv_list = pandas.read_csv('../Data/nasdaq_screener.csv')
 all_stock_list = csv_list[csv_list.columns[0]]
 start_time = dt.datetime.now()
-for each_stock in stock_list:
+for each_stock in all_stock_list:
     if '^' in each_stock or '/' in each_stock: continue
     try:
         stock = stock_data(stock_name=each_stock, period = '7d')
@@ -125,4 +121,3 @@ print(fail_list)
 print(f'Start at: {start_time}')
 print(f'End at: {dt.datetime.now()}')
 
-#print(total_outcome / 10)

@@ -22,9 +22,6 @@ for line in f:
         stock_info[each_stock['name']] = each_stock
         each_stock = {}
 
-#print(len(stock_info))
-#print(list(stock_info.keys())[0])
-
 sorted_list = [stock_info[list(stock_info.keys())[0]]]
 sort_key = 'fail_chance'
 
@@ -43,10 +40,8 @@ for stock_name in list(stock_info.keys())[1:]:
 
 sorted_name = []
 for stock in sorted_list:
-    #print(stock)
     print(f'stock: {stock["name"]}\t count: {stock["trade_count"]}\t fail: {stock[sort_key]}\n')
-    #sorted_name = 
-    #print()
+
 
 f = open('top_20_output.txt', 'w')
 f.write(str(sorted_list))
