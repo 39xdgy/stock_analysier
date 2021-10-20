@@ -1,14 +1,14 @@
-from webull import paper_webull, webull
+from robin_stocks import robinhood as rh
 from stock_data import stock_data
 from trade import trade as td
 from datetime import datetime
 
-import os.path, json, pandas
+import os.path, json, pandas, pyotp, ftplib
 
 
-class user:
+class rb_user:
 
-    def __init__(self, json_path, stock_dic, is_pwb = True, data_range = ['3d', '1m']):
+    def __init__(self, json_path, stock_dic, data_range = ['3d', '1m']):
         self.stock_dic = stock_dic
         if not os.path.exists("../Data/back_up.json"):
             with open("../Data/back_up.json", "w") as f:
@@ -17,8 +17,6 @@ class user:
             with open("../Data/back_up.json", "r") as f:
                 self.stock_dic = json.load(f)
         self.json_path = json_path
-        self.is_pwb = is_pwb
-        self.wb, self.pwb = webull(), paper_webull()
         self.stats_index, self.buy_flag, self.sell_flag, self.trade_counter = {}, {}, {}, {}
         self.trade_record = []
         self.data_range = data_range
@@ -60,12 +58,38 @@ class user:
         with open("../Data/memory.json", 'w') as f:
             json.dump(self.memory, f)
 
+
+    def _check_if_ticker_in_list(self, ticker) -> bool:
+        return 'File Creation Time' not in ticker and 'Symbol' not in ticker and "$" not in ticker and "." not in ticker and ticker not in self.all_stocks_ticker
+
+    def create_all_stock_tickers(self):
+        ftp = ftplib.FTP('ftp.nasdaqtrader.com', 'anonymous', 'anonymous@debian.org')
+        
+        # Download files nasdaqlisted.txt and otherlisted.txt from ftp.nasdaqtrader.com
+        for ficheiro in ["nasdaqlisted.txt", "otherlisted.txt"]:
+                ftp.cwd("/SymbolDirectory")
+                localfile = open(f'../Data/{ficheiro}', 'wb')
+                ftp.retrbinary('RETR ' + ficheiro, localfile.write)
+                localfile.close()
+        ftp.quit()
+        
+        # Grep for common stock in nasdaqlisted.txt and otherlisted.txt
+
+        self.all_stocks_ticker = []
+
+        for ficheiro in ["nasdaqlisted.txt", "otherlisted.txt"]:
+                localfile = open(f'../Data/{ficheiro}', 'r')
+                open("../Data/tickers.txt", "w")
+                for line in localfile:
+                    #print(line)
+                    ticker = line.split("|")[0]
+                    if self._check_if_ticker_in_list(ticker):
+                        self.all_stocks_ticker.append(ticker)
+
+
     def simulation_2_filter(self):
-        csv_list = pandas.read_csv('../Data/nasdaq_screener.csv')
-        all_stocks_ticker = csv_list[csv_list.columns[0]]
-        success_list = []
         pass_stock = {}
-        for ticker in all_stocks_ticker:
+        for ticker in self.all_stocks_ticker:
             if '^' in ticker or '/' in ticker: continue
             try:
                 stock = stock_data(stock_name=ticker, period = '7d')
@@ -122,14 +146,9 @@ class user:
                     }
                 total_outcome += base_value
 
-                success_list.append(ticker)
             except Exception as e:
                 continue
 
-
-        with open("../Data/success.json", "w") as f:
-                json.dump(success_list, f)
-        print(success_list)
         sorted_list = [pass_stock[list(pass_stock.keys())[0]]]
         sort_key = 'fail_chance'
 
@@ -150,11 +169,6 @@ class user:
         
         self.next_day_dic = {stock["name"]: 0 for stock in sorted_list}
         
-        
-
-
-
-
 
     # trade with all the stocks under this user
     def trade(self):
@@ -172,21 +186,17 @@ class user:
                     new_td.buy_update(name = key, start_time = str(datetime.now()), start_price = each_stock.get_current_price(), amount = quant)
                     self.trade_counter[key] = new_td
                     self.stock_dic[key] = quant
+                    # TODO change buy system
+                    self.stock_dic[key] = real_quant
+                    rh.order_buy_market(key, real_quant)
                     
-                    if self.is_pwb: 
-                        self.stock_dic[key] = quant
-                        self.pwb.place_order(stock = key, action = "BUY", orderType = "MKT", enforce = "DAY", quant = quant)
-                    else: 
-                        self.stock_dic[key] = real_quant
-                        self.wb.place_order(stock = key, action = "BUY", orderType = "MKT", enforce = "DAY", quant = real_quant)
-
                 elif (not value == 0) and should_sell['kdjj']:
                     #finished_td = self.trade_counter[key]
                     #finished_td.sell_update(end_time = str(datetime.now()), end_price = each_stock.get_current_price())
                     #self.trade_record.append(finished_td)
                     self.stock_dic[key] = 0
-                    if self.is_pwb: self.pwb.place_order(stock = key, action = "SELL", orderType = "MKT", enforce = "DAY", quant = value)
-                    else: self.wb.place_order(stock = key, action = "SELL", orderType = "MKT", enforce = "DAY", quant = value)
+                    # TODO change buy system
+                    rh.order_buy_market(key, value)
                     if(key in self.memory):
                         del self.memory[self.memory.index(key)]
                         del self.stock_dic[key]
@@ -211,53 +221,19 @@ class user:
         f.write(write_str)
         f.close()
 
-    # login to the webull real account
-    def login_wb(self):
-        fh = open(self.json_path, 'r')
-        credential_data = json.load(fh)
-        fh.close()
+    def login(self):
+        user_data = {}
+        with open(self.json_path, 'r') as f:
+            user_data = json.load(f)
+        #print(user_data)
+        totp = pyotp.TOTP(user_data['token']).now()
+        print("Please check your message on your phone for your validation code!")
+        login = rh.login(user_data['user'], user_data['pwd'], mfa_code=totp)
+        return login
 
-        self.wb._refresh_token = credential_data['refreshToken']
-        self.wb._access_token = credential_data['accessToken']
-        self.wb._token_expire = credential_data['tokenExpireTime']
-        self.wb._uuid = credential_data['uuid']
+    def logout(self):
+        rh.logout()
 
-        n_data = self.wb.refresh_login()
-        #print(n_data)
-        credential_data['refreshToken'] = n_data['refreshToken']
-        credential_data['accessToken'] = n_data['accessToken']
-        credential_data['tokenExpireTime'] = n_data['tokenExpireTime']
-
-        file = open(self.json_path, 'w')
-        json.dump(credential_data, file)
-        file.close()
-
-        # important to get the account_id
-        return self.wb.get_account_id()
-
-    # login to the webull paper trading account
-    def login_pwb(self):
-        fh = open(self.json_path, 'r')
-        credential_data = json.load(fh)
-        fh.close()
-
-        self.pwb._refresh_token = credential_data['refreshToken']
-        self.pwb._access_token = credential_data['accessToken']
-        self.pwb._token_expire = credential_data['tokenExpireTime']
-        self.pwb._uuid = credential_data['uuid']
-
-        n_data = self.pwb.refresh_login()
-
-        credential_data['refreshToken'] = n_data['refreshToken']
-        credential_data['accessToken'] = n_data['accessToken']
-        credential_data['tokenExpireTime'] = n_data['tokenExpireTime']
-
-        file = open(self.json_path, 'w')
-        json.dump(credential_data, file)
-        file.close()
-
-        # important to get the account_id
-        return self.pwb.get_account_id()
 
 
 if __name__ == "__main__":
@@ -268,15 +244,17 @@ if __name__ == "__main__":
     for key in stock_list:
         stock_dic[key] = 0
 
-    test_user = user("../Data/webull_credentials.json", stock_dic)
-    wb_id = test_user.login_wb()
-    pwb_id = test_user.login_pwb()
+    test_user = rb_user("../Data/rh_login.json", stock_dic)
+    print(test_user.login())
 
 
     stats_index = ['kdjj']
     buy_flag = {'kdjj': 15}
     sell_flag = {'kdjj': 85}
     test_user.set_trade_data((stats_index, buy_flag, sell_flag))
-    #schedule.every().saturday.at("14:42").do(test_user.trade)
-    print(test_user.simulation_2_filter())
+
+    
+
+    test_user.logout()
+
 
