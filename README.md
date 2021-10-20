@@ -33,6 +33,10 @@ Some nice tips that you might run into
 
 * https://github.com/pydata/pandas-datareader/issues/170
 
+
+* The robinhood API would have a issue with login where you have to edit. Here is the link
+    * https://github.com/jmfernandes/robin_stocks/issues/301
+
 * Since the webull api is not offical, developed by [tedchou12](https://github.com/tedchou12), please take a good look on how to login/use the api. Here are some good links for that. YOU HAVE TO READ THROUGH THIS TO BE ABLE TO LOGIN TO WEBULL!
     * https://github.com/tedchou12/webull/wiki/Workaround-for-Login
 
