@@ -40,6 +40,11 @@ for h in range(10, 16):
         schedule.every().thursday.at(tot_time).do(short_user.trade)
         schedule.every().friday.at(tot_time).do(short_user.trade)
 
+schedule.every().monday.at("17:00").do(short_user.create_all_stock_tickers)
+schedule.every().tuesday.at("17:00").do(short_user.create_all_stock_tickers)
+schedule.every().wednesday.at("17:00").do(short_user.create_all_stock_tickers)
+schedule.every().thursday.at("17:00").do(short_user.create_all_stock_tickers)
+schedule.every().friday.at("17:00").do(short_user.create_all_stock_tickers)
 
 schedule.every().monday.at("18:00").do(short_user.simulation_2_filter)
 schedule.every().tuesday.at("18:00").do(short_user.simulation_2_filter)
