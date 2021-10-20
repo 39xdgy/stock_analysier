@@ -1,7 +1,7 @@
 import json
 from webull import paper_webull, webull # for real trading, import 'webull'
 
-wb = paper_webull()
+wb = webull()
 
 
 fh = open('../Data/webull_credentials.json', 'r')
@@ -24,8 +24,16 @@ file.close()
 
 # important to get the account_id
 #print(wb.get_account_id())
-print(wb.get_detail())
-#print(wb.get_account())
-print(wb.get_account())
+#print(wb.get_detail())
+account_info = wb.get_account()
+'''
+for key in account_info:
+    print(f'{key}: {account_info[key]}')
+'''
 
-print(wb.place_order(stock = "AAPL", action = "BUY", orderType = "MKT", enforce = "DAY", quant = 2))
+radio = 2 / 3
+base = 5000
+
+outcome = float(account_info['netLiquidation']) * radio // base * base
+print(outcome)
+#print(wb.place_order(stock = "AAPL", action = "BUY", orderType = "MKT", enforce = "DAY", quant = 2))
