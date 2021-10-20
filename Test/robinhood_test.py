@@ -1,6 +1,6 @@
 from robin_stocks import robinhood as rh
 
-import json, pyotp
+import json, pyotp, time
 
 user_data = {}
 with open('../Data/rh_login.json', 'r') as f:
@@ -13,6 +13,10 @@ print(totp)
 
 
 
-#login = rh.login(user_data['user'], user_data['pwd'], mfa_code=totp)
+login = rh.login(user_data['user'], user_data['pwd'], mfa_code=totp)
 
 print(rh.build_user_profile())
+
+rh.order_buy_market("AMRN", 2)
+time.sleep(5)
+rh.order_sell_market("AMRN", 2)
