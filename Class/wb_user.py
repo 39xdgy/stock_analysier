@@ -25,6 +25,7 @@ class wb_user:
         self.next_day_dic = {}
         self.all_stocks_ticker = []
         self.memory = []
+        self.each_stock_money = 10000
         if not os.path.exists("../Data/memory.json"):
             with open("../Data/memory.json", "w") as f:
                 json.dump(self.memory, f)
@@ -87,6 +88,10 @@ class wb_user:
                     ticker = line.split("|")[0]
                     if self._check_if_ticker_in_list(ticker):
                         self.all_stocks_ticker.append(ticker)
+
+    def calculate_real_quant(self):
+        all_money = float(self.wb.get_account()['netLiquidation'])
+        self.each_stock_money = (all_money * 2/3 // 5000 * 5000) / 10
 
 
     def simulation_2_filter(self):
@@ -183,7 +188,7 @@ class wb_user:
                 should_buy = each_stock.should_buy()
                 should_sell = each_stock.should_sell()
                 quant = 10000 // each_stock.get_current_price()
-                real_quant = 150 // each_stock.get_current_price()
+                real_quant = self.each_stock_money // each_stock.get_current_price()
                 if value == 0 and should_buy['kdjj']:
                     new_td = td()
                     new_td.buy_update(name = key, start_time = str(datetime.now()), start_price = each_stock.get_current_price(), amount = quant)

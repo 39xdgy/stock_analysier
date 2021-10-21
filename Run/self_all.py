@@ -20,6 +20,12 @@ sell_flag = {'kdjj': 85}
 
 short_user.set_trade_data((stats_index, buy_flag, sell_flag))
 
+schedule.every().monday.at("09:00").do(short_user.calculate_real_quant)
+schedule.every().tuesday.at("09:00").do(short_user.calculate_real_quant)
+schedule.every().wednesday.at("09:00").do(short_user.calculate_real_quant)
+schedule.every().thursday.at("09:00").do(short_user.calculate_real_quant)
+schedule.every().friday.at("09:00").do(short_user.calculate_real_quant)
+
 for m in range(30, 60):
     tot_time = f'09:{str(m)}'
     schedule.every().monday.at(tot_time).do(short_user.trade)
