@@ -2,8 +2,38 @@ import datetime as dt
 import sys
 import pandas
 
-#print(gt.get_tickers(NYSE = False, NASDAQ = True, AMEX = True))
+import ftplib
+import os
+import re
 
+# Connect to ftp.nasdaqtrader.com
+ftp = ftplib.FTP('ftp.nasdaqtrader.com', 'anonymous', 'anonymous@debian.org')
+ 
+# Download files nasdaqlisted.txt and otherlisted.txt from ftp.nasdaqtrader.com
+for ficheiro in ["nasdaqlisted.txt", "otherlisted.txt"]:
+        ftp.cwd("/SymbolDirectory")
+        localfile = open(f'../Data/{ficheiro}', 'wb')
+        ftp.retrbinary('RETR ' + ficheiro, localfile.write)
+        localfile.close()
+ftp.quit()
+ 
+# Grep for common stock in nasdaqlisted.txt and otherlisted.txt
+
+test_tickers = []
+
+for ficheiro in ["nasdaqlisted.txt", "otherlisted.txt"]:
+        localfile = open(f'../Data/{ficheiro}', 'r')
+        open("../Data/tickers.txt", "w")
+        for line in localfile:
+            #print(line)
+            ticker = line.split("|")[0]
+            if 'File Creation Time' not in ticker and 'Symbol' not in ticker and "$" not in ticker and "." not in ticker and ticker not in test_tickers:
+                test_tickers.append(ticker)
+
+
+
+#print(gt.get_tickers(NYSE = False, NASDAQ = True, AMEX = True))
+print(len(test_tickers))
 sys.path.append('../Class/')
 from stock_data import stock_data
 
@@ -13,17 +43,16 @@ today = dt.datetime.today().strftime('%Y-%m-%d')
 #print(start)
 stock_info = ['kdjj']#['macd', 'macds', 'macdh', 'kdjk', 'kdjd', 'kdjj', 'rsi_6', 'rsi_12', 'rsi_14']
 
-stock_list = ["AAPL", "SBUX", "ZM", "TWTR", "GME", "DIS", "V", "INTC", "NVDA", "LYFT", "AMRN"]
-stock_list += ["TTE", "SGOC", "CPK", "HQI", "TDAC", "NXPI", "AB", "FIVN", "SILV", "HUBS"]
-stock_list = ['FRLN', 'SALM', 'ADMA', 'IVR', 'NBY', 'AVD', 'STVN', 'GGPI', 'SOGO', 'GPOR']
-stock_list = ['CEI']
 write_info = f'Top 20 \n\n'
 total_outcome = 0
 fail_list = []
 csv_list = pandas.read_csv('../Data/nasdaq_screener.csv')
 all_stock_list = csv_list[csv_list.columns[0]]
 start_time = dt.datetime.now()
-for each_stock in stock_list:
+
+set_tickers = ["SV", "ORC", "CRF", "MIC", "CLBS", "LYG", "NTB", "FTK", "GERN", "ADMS", "ETY", "SRGA"]
+
+for each_stock in set_tickers:
     if '^' in each_stock or '/' in each_stock: continue
     try:
         stock = stock_data(stock_name=each_stock, period = '7d')
@@ -54,7 +83,7 @@ for each_stock in stock_list:
             diff = row['kdjk'] - row['kdjd']
             
             if flag:
-                if row['kdjj'] < 10:
+                if row['kdjj'] < 15:
                     #print(row['kdjj'])
                     sell_flag = True
                     trade_count += 0.5
@@ -67,7 +96,7 @@ for each_stock in stock_list:
                     #print(f'{each_stock} buying with {stock_num} of stocks. Orgin value is {base_value}.\n')
 
             elif sell_flag:
-                if row['kdjj'] > 90 or (row['close'] - temp_price) / temp_price >= 0.02:
+                if row['kdjj'] > 85:# or (row['close'] - temp_price) / temp_price >= 0.02:
                     #(row['kdjj'])
                     #print((row['close'] - temp_price) / temp_price)
                     trade_count += 0.5
@@ -115,7 +144,7 @@ for each_stock in stock_list:
         #print(each_stock)
         fail_list.append(each_stock)
 '''
-f = open(".\\..\\data\\all_stock_5m_output.txt", "w")
+f = open("../data/all_stock_1m_output.txt", "w")
 f.write(write_info)
 f.close()
 '''
@@ -125,4 +154,3 @@ print(fail_list)
 print(f'Start at: {start_time}')
 print(f'End at: {dt.datetime.now()}')
 
-#print(total_outcome / 10)
