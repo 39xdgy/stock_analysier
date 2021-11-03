@@ -8,7 +8,7 @@ import os.path, json, pandas, ftplib
 
 class wb_user:
 
-    def __init__(self, json_path, stock_dic, is_pwb = True, data_range = ['3d', '1m']):
+    def __init__(self, json_path, stock_dic, is_pwb, data_range = ['3d', '1m']):
         self.stock_dic = stock_dic
         if not os.path.exists("../Data/back_up.json"):
             with open("../Data/back_up.json", "w") as f:
@@ -183,7 +183,7 @@ class wb_user:
                 should_buy = each_stock.should_buy()
                 should_sell = each_stock.should_sell()
                 quant = 10000 // each_stock.get_current_price()
-                real_quant = 150 // each_stock.get_current_price()
+                real_quant = 1500 // each_stock.get_current_price()
                 if value == 0 and should_buy['kdjj']:
                     new_td = td()
                     new_td.buy_update(name = key, start_time = str(datetime.now()), start_price = each_stock.get_current_price(), amount = quant)
@@ -195,8 +195,8 @@ class wb_user:
                         self.pwb.place_order(stock = key, action = "BUY", orderType = "MKT", enforce = "DAY", quant = quant)
                     else: 
                         self.stock_dic[key] = real_quant
-                        self.wb.place_order(stock = key, action = "BUY", orderType = "MKT", enforce = "DAY", quant = real_quant)
-
+                        buy_out = self.wb.place_order(stock = key, action = "BUY", orderType = "MKT", enforce = "DAY", quant = real_quant)
+                        print(buy_out)
                 elif (not value == 0) and should_sell['kdjj']:
                     #finished_td = self.trade_counter[key]
                     #finished_td.sell_update(end_time = str(datetime.now()), end_price = each_stock.get_current_price())
@@ -229,7 +229,7 @@ class wb_user:
         f.close()
 
     # login to the webull real account
-    def login_wb(self):
+    def login_wb(self, trade_pwd):
         fh = open(self.json_path, 'r')
         credential_data = json.load(fh)
         fh.close()
@@ -248,8 +248,10 @@ class wb_user:
         file = open(self.json_path, 'w')
         json.dump(credential_data, file)
         file.close()
-
+        
         # important to get the account_id
+        self.wb._account_id = self.wb.get_account_id()
+        self.wb.get_trade_token(trade_pwd)
         return self.wb.get_account_id()
 
     # login to the webull paper trading account
@@ -272,6 +274,7 @@ class wb_user:
         file = open(self.json_path, 'w')
         json.dump(credential_data, file)
         file.close()
+        
 
         # important to get the account_id
         return self.pwb.get_account_id()
@@ -285,8 +288,8 @@ if __name__ == "__main__":
     for key in stock_list:
         stock_dic[key] = 0
 
-    test_user = wb_user("../Data/webull_credentials.json", stock_dic)
-    wb_id = test_user.login_wb()
+    test_user = wb_user("../Data/webull_credentials.json", stock_dic, is_pwb = True)
+    #wb_id = test_user.login_wb()
     pwb_id = test_user.login_pwb()
 
 
@@ -297,4 +300,5 @@ if __name__ == "__main__":
     #schedule.every().saturday.at("14:42").do(test_user.trade)
     test_user.create_all_stock_tickers()
     test_user.simulation_2_filter()
+    test_user.update_stock_list()
 

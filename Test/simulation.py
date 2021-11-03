@@ -52,7 +52,7 @@ start_time = dt.datetime.now()
 
 set_tickers = ["SV", "ORC", "CRF", "MIC", "CLBS", "LYG", "NTB", "FTK", "GERN", "ADMS", "ETY", "SRGA"]
 
-for each_stock in set_tickers:
+for each_stock in test_tickers:
     if '^' in each_stock or '/' in each_stock: continue
     try:
         stock = stock_data(stock_name=each_stock, period = '7d')
@@ -125,29 +125,29 @@ for each_stock in set_tickers:
             #print("BRO")
             base_value += stock.get_current_price() * stock_num
 
-        '''
+        
         if fail_count / trade_count <= 0.25 and trade_count >= 15 and base_value > 10150:
             write_info += f'{each_stock} \t 10000 -> {base_value}\n'
             write_info += f'{trade_count} \t {fail_count / trade_count}% of fail\n'
             write_info += f'{time_sum / trade_count} \t {str(time_tracker)}\n\n'
-        '''
-        total_outcome += base_value
         
+        total_outcome += base_value
+        '''        
         print(f'{each_stock} is finished. here is the output!')
         print(f'\t Outcome: {base_value}')
         print(f'\t Trade number: {trade_count}')
         print(f'\t Fail%: {fail_count / trade_count}')
         print(f'\t Avg time: {time_sum / trade_count}')
         #print(time_tracker)
-        
+        '''
     except:
         #print(each_stock)
         fail_list.append(each_stock)
-'''
+
 f = open("../data/all_stock_1m_output.txt", "w")
 f.write(write_info)
 f.close()
-'''
+
 
 print("fail_list here")
 print(fail_list)

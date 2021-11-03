@@ -1,4 +1,4 @@
-import sys, schedule, time
+import sys, schedule, time, json
 
 sys.path.append('../Class/')
 from trade import trade
@@ -10,9 +10,16 @@ long_stock_dic, short_stock_dic = {}, {}
 
 #for key in long_stock_list: long_stock_dic[key] = 0
 short_stock_dic = {key: 0 for key in short_stock_list}
-short_user = wb_user(json_path = "../Data/webull_credentials.json", stock_dic = short_stock_dic)
+short_user = wb_user(json_path = "../Data/webull_credentials.json", stock_dic = short_stock_dic, is_pwb = False)
 
-short_user.login_pwb()
+trade_key = ''
+with open("../Data/trade_key.json", "r") as f:
+    key_dic = json.load(f)
+    trade_key = key_dic['pwd']
+
+
+#short_user.login_pwb()
+short_user.login_wb(trade_key)
 
 stats_index = ['kdjj']
 buy_flag = {'kdjj': 15}
