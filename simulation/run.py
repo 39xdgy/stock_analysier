@@ -19,8 +19,8 @@ def worker(lock, shared_str, start, end, stock):
 
 def main(schedule, n=0):
     start = T.time()
-    
-    csv_list = pandas.read_csv('../Data/nasdaq.csv')
+    #--------------------------------Load different CSV file--------------------------------
+    csv_list = pandas.read_csv('../Data/russell-1000.csv')
     stock_list = csv_list[csv_list.columns[0]]
     args_iter = []
     
@@ -64,11 +64,13 @@ def analyze_performance(schedule, n=0):
         return sum(outcome_lst)/len(outcome_lst)
 
 if __name__ == "__main__":
+    #------------------change the schedule to the one you want to run------------------
     schedule = rolling_six_mon_two_mon_schedule()
     schedule.pop()
 
     five_year_performance = []
-    f = open('../Data/5yr_6mo_2mo_kdjj_15_85.txt', 'w')
+    #-------------------change the file name to the schedule you are running-------------------
+    f = open('../Data/5yr_6mo_2mo_kdjj_15_85_rus1000.txt', 'w')
     for i in range(len(schedule)):
         print(f"Running schedule {i}")
         main(schedule, i)
