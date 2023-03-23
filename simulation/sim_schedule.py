@@ -108,3 +108,33 @@ def six_mon_three_mon_schedule():
         else:
             date_pairs.append((trading_days[i], trading_days[-1]))
     return date_pairs
+
+
+
+def five_day_one_day_schedule():
+    # Define the stock exchange we want to use
+    nyse = mcal.get_calendar('NYSE')
+
+    # Define the start and end dates
+    end_date = datetime.today()
+    start_date = end_date - timedelta(days=45)
+
+    # Get the schedule of trading days between the start and end dates
+    schedule = nyse.schedule(start_date=start_date, end_date=end_date)
+
+    # Get the trading days as a list of datetime objects
+    trading_days = schedule.index.tolist()
+
+    # Create a list of tuples, where each tuple contains the start and end date of a 5-day period followed by a 1-day period
+    date_pairs = []
+    five_day_days = 5
+    one_day_days = 2
+
+    for i in range(len(trading_days) - five_day_days - one_day_days + 1):
+        five_day_start = trading_days[i]
+        five_day_end = trading_days[i + five_day_days - 1]
+        one_day_start = trading_days[i + five_day_days]
+        one_day_end = trading_days[i + five_day_days + one_day_days - 1]
+        date_pairs.append((five_day_start, five_day_end, one_day_start, one_day_end))
+
+    return date_pairs

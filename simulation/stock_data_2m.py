@@ -3,14 +3,15 @@ import pandas_datareader as web
 import yfinance as yf
 import stockstats
 import os
-from get_stock_data import fetch_data
+from get_stock_data import fetch_data_2m
+
 
 class stock_data:
     def __init__(self, stock_name, start, end):
         self._stock_name = stock_name
         self._start = start
         self._end = end
-        self._stock_data = fetch_data(self._stock_name, self._start, self._end)
+        self._stock_data = fetch_data_2m(self._stock_name, self._start, self._end)
         self._buy_flag = {}
         self._sell_flag = {}
 
@@ -44,7 +45,7 @@ class stock_data:
 
     # update the stock data to get the latest stock info
     def update_stock_data(self):
-        self._stock_data = fetch_data(self._stock_name, self._start, self._end)
+        self._stock_data = fetch_data_2m(self._stock_name, self._start, self._end)
 
     # create the stats info and add it into the stock data
     def get_stats_info(self, info_list):
@@ -128,7 +129,7 @@ class stock_data:
 
 if __name__ == "__main__":
     #testing only
-    test = stock_data(stock_name="AAPL", start=1552790273, end=1584422673)
+    test = stock_data(stock_name="AAPL", start=1679493600, end=1679511600)
     print(test)
     test.get_stats_info(['kdjj'])
     test.set_buy_flag({'kdjj': 15})

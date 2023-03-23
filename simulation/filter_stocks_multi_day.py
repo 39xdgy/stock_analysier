@@ -1,6 +1,6 @@
 import datetime as dt
 import json
-from stock_data import stock_data
+from stock_data_day import stock_data
 
 def filter_sort():
     with open('../Data/all_stock_1d_output.txt', 'r') as f:
@@ -32,7 +32,8 @@ def filter_sort():
         json.dump(sorted_list, f)
     
 def run_filter(start, end, each_stock):
-    stock_info = ['kdjj']   #['macd', 'macds', 'macdh', 'kdjk', 'kdjd', 'kdjj', 'rsi_6', 'rsi_12', 'rsi_14']
+    #--------------------------------Change filter--------------------------------
+    stock_info = ['macd']   #['macd', 'macds', 'macdh', 'kdjk', 'kdjd', 'kdjj', 'rsi_6', 'rsi_12', 'rsi_14']
 
     write_info = ""
     total_outcome = 0
@@ -40,7 +41,7 @@ def run_filter(start, end, each_stock):
 
     try:
 
-        #######          change param here         #############
+        ####### ---------------------change param here----------------------------#############
         # pandas datetime to unix timestamp
         start = start.value//10**9
         end = end.value//10**9
@@ -51,14 +52,14 @@ def run_filter(start, end, each_stock):
         indicator_low = 15
         indicator_high = 85
 
-        #macd_low = 5
-        #macd_high = 95
+        macd_low = 5
+        macd_high = 95
 
-        stock.set_buy_flag({"kdjj": indicator_low})
-        stock.set_sell_flag({"kdjj": indicator_high})
-        # stock.set_buy_flag({"macd": macd_low})
-        # stock.set_sell_flag({"macd": macd_high})
-        
+        # stock.set_buy_flag({"kdjj": indicator_low})
+        # stock.set_sell_flag({"kdjj": indicator_high})
+        stock.set_buy_flag({"macd": macd_low})
+        stock.set_sell_flag({"macd": macd_high})
+
         time_diff = 0
         time_sum = 0
         time_tracker = [-1, -1]
@@ -76,11 +77,9 @@ def run_filter(start, end, each_stock):
         temp_price = 0.0
 
         for index, row in stock.get_stock_data().iterrows():
-            #print(row['macdh'])
-            diff = row['kdjk'] - row['kdjd']
-            
+          
             if flag:
-                if row['kdjj'] < indicator_low:
+                if row['macd'] < indicator_low:
                     #print(row['kdjj'])
                     sell_flag = True
                     trade_count += 0.5
@@ -93,7 +92,7 @@ def run_filter(start, end, each_stock):
                     #print(f'{each_stock} buying with {stock_num} of stocks. Orgin value is {base_value}.\n')
 
             elif sell_flag:
-                if row['kdjj'] > indicator_high:# or (row['close'] - temp_price) / temp_price >= 0.02:
+                if row['macd'] > indicator_high:# or (row['close'] - temp_price) / temp_price >= 0.02:
                     #(row['kdjj'])
                     #print((row['close'] - temp_price) / temp_price)
                     trade_count += 0.5
@@ -144,7 +143,7 @@ def run_filter(start, end, each_stock):
     return write_info
     
 def run_analyze(start, end, each_stock):
-    stock_info = ['kdjj']   #['macd', 'macds', 'macdh', 'kdjk', 'kdjd', 'kdjj', 'rsi_6', 'rsi_12', 'rsi_14']
+    stock_info = ['macd']   #['macd', 'macds', 'macdh', 'kdjk', 'kdjd', 'kdjj', 'rsi_6', 'rsi_12', 'rsi_14']
 
     write_info = ""
     total_outcome = 0
@@ -164,14 +163,14 @@ def run_analyze(start, end, each_stock):
         
         indicator_low = 15
         indicator_high = 85
-        #macd_low = 5
-        #macd_high = 95
+        macd_low = 5
+        macd_high = 95
 
 
-        stock.set_buy_flag({"kdjj": indicator_low})
-        stock.set_sell_flag({"kdjj": indicator_high})
-        # stock.set_buy_flag({"macd": macd_low})
-        # stock.set_sell_flag({"macd": macd_high})
+        # stock.set_buy_flag({"kdjj": indicator_low})
+        # stock.set_sell_flag({"kdjj": indicator_high})
+        stock.set_buy_flag({"macd": macd_low})
+        stock.set_sell_flag({"macd": macd_high})
 
         time_diff = 0
         time_sum = 0
@@ -189,11 +188,9 @@ def run_analyze(start, end, each_stock):
         value_record = 10000
         temp_price = 0.0
         for index, row in stock.get_stock_data().iterrows():
-            #print(row['macdh'])
-            diff = row['kdjk'] - row['kdjd']
-            
+          
             if flag:
-                if row['kdjj'] < indicator_low:
+                if row['macd'] < indicator_low:
                     #print(row['kdjj'])
                     sell_flag = True
                     trade_count += 0.5
@@ -206,7 +203,7 @@ def run_analyze(start, end, each_stock):
                     #print(f'{each_stock} buying with {stock_num} of stocks. Orgin value is {base_value}.\n')
 
             elif sell_flag:
-                if row['kdjj'] > indicator_high:# or (row['close'] - temp_price) / temp_price >= 0.02:
+                if row['macd'] > indicator_high:# or (row['close'] - temp_price) / temp_price >= 0.02:
                     #(row['kdjj'])
                     #print((row['close'] - temp_price) / temp_price)
                     trade_count += 0.5

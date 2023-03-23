@@ -4,7 +4,10 @@ from tqdm import tqdm
 import pandas
 import time as T
 import json
-from filter_stocks import run_filter, filter_sort, run_analyze
+
+#--------------------------------Change filter--------------------------------
+from filter_stocks_day import run_filter, filter_sort, run_analyze
+#from filter_stocks_multi_day import run_filter, filter_sort, run_analyze
 from sim_schedule import *
 
 
@@ -20,7 +23,7 @@ def worker(lock, shared_str, start, end, stock):
 def main(schedule, n=0):
     start = T.time()
     #--------------------------------Load different CSV file--------------------------------
-    csv_list = pandas.read_csv('../Data/russell-1000.csv')
+    csv_list = pandas.read_csv('../Data/nasdaq.csv')
     stock_list = csv_list[csv_list.columns[0]]
     args_iter = []
     
@@ -38,8 +41,9 @@ def main(schedule, n=0):
         
         end = T.time()
         print(f"Time taken: {end - start} seconds")
-        #print(f"Final string: {shared_str.value}")
-        f = open("../Data/all_stock_1d_output.txt", "w")
+        # print(f"Final string: {shared_str.value}")
+        #-------------------change the output file name-------------------
+        f = open("../Data/all_stock_2m_output.txt", "w")
         f.write(shared_str.value)
         f.close()
         filter_sort()
@@ -65,18 +69,18 @@ def analyze_performance(schedule, n=0):
 
 if __name__ == "__main__":
     #------------------change the schedule to the one you want to run------------------
-    schedule = rolling_six_mon_two_mon_schedule()
+    schedule = five_day_one_day_schedule()
     schedule.pop()
 
     five_year_performance = []
     #-------------------change the file name to the schedule you are running-------------------
-    f = open('../Data/5yr_6mo_2mo_kdjj_15_85_rus1000.txt', 'w')
+    f = open('../Data/60d_5d_1d_kdjj_5_95.txt', 'w')
     for i in range(len(schedule)):
         print(f"Running schedule {i}")
         main(schedule, i)
         five_year_performance.append(analyze_performance(schedule, i))
         f.write(str(five_year_performance[i]) + "\n")
-    print("5yr avg:" + str(sum(five_year_performance)/len(five_year_performance)))
+    print("Total avg:" + str(sum(five_year_performance)/len(five_year_performance)))
     print(five_year_performance)
     f.close()
 
