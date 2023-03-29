@@ -3,15 +3,13 @@ import pandas_datareader as web
 import yfinance as yf
 import stockstats
 import os
-from get_stock_data import fetch_data_1m
 
-
-class stock_data:
-    def __init__(self, stock_name, start, end):
+class stock_data_origin:
+    def __init__(self, stock_name, period = "7d", interval = "1m"):
         self._stock_name = stock_name
-        self._start = start
-        self._end = end
-        self._stock_data = fetch_data_1m(self._stock_name, self._start, self._end)
+        self._period = period
+        self._intervial = interval
+        self._stock_data = yf.download(tickers = self._stock_name, period = self._period, interval = self._intervial)
         self._buy_flag = {}
         self._sell_flag = {}
 
@@ -19,13 +17,35 @@ class stock_data:
 
     def get_stock_name(self) -> str:
         return self._stock_name
+    
+    def get_period(self) -> str:
+        return self._period
+
+    def get_interval(self) -> str:
+        return self._intervial
 
     def get_stock_data(self):
         return self._stock_data
 
+    def get_buy_flag(self) -> dict:
+        return self._buy_flag
+
+    def get_sell_flag(self) -> dict:
+        return self._sell_flag
 
     #---------------------------------------
 
+    def set_stock_name(self, stock_name: str):
+        self._stock_name = stock_name
+        self.update_stock_data()
+
+    def set_period(self, period: str):
+        self._period = period
+        self.update_stock_data()
+
+    def set_interval(self, interval: str):
+        self._interval = interval
+        self.update_stock_data()
 
     def set_buy_flag(self, buy_flag: dict):
         self._buy_flag = buy_flag
@@ -37,20 +57,23 @@ class stock_data:
 
     def __str__(self) -> str:
         out = f'Stock: {self._stock_name}\n'
-        out += f'\tStart: {self._start}\n'
-        out += f'\tEnd: {self._end}\n'
+        out += f'\tPeriod: {self._period}\n'
+        out += f'\tInterval: {self._intervial}\n'
         return out
 
     #---------------------------------------------------
 
     # update the stock data to get the latest stock info
     def update_stock_data(self):
-        self._stock_data = fetch_data_1m(self._stock_name, self._start, self._end)
+        self._stock_data = yf.download(tickers = self._stock_name, period = self._period, interval = self._intervial)
+
+    def write_to_json(self):
+        self._stock_data.to_json(self._stock_name + '.json')
+
 
     # create the stats info and add it into the stock data
     def get_stats_info(self, info_list):
         try:
-            #print(self._stock_data)
             stockStat = stockstats.StockDataFrame.retype(self._stock_data)
             for info in info_list:
                 self._stock_data[info] = stockStat[[info]]
@@ -78,7 +101,6 @@ class stock_data:
                     else: output[key] = False
                 else: output[key] = False
             else:
-                print(self._stock_data)
                 data_value= self._stock_data.at[self._stock_data.index[-1], key]
                 last_data_value = self._stock_data.at[self._stock_data.index[-2], key]
                 if key == "macdh":
@@ -129,7 +151,7 @@ class stock_data:
 
 if __name__ == "__main__":
     #testing only
-    test = stock_data(stock_name="AAPL", start=1679493600, end=1679511600)
+    test = stock_data_origin(stock_name="FRLN")
     print(test)
     test.get_stats_info(['kdjj'])
     test.set_buy_flag({'kdjj': 15})
