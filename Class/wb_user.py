@@ -1,14 +1,16 @@
 from webull import paper_webull, webull
 from stock_data import stock_data
+from stock_data_origin import stock_data_origin
 from trade import trade as td
-from datetime import datetime
+from datetime import datetime, timedelta, time
+import time as tm
 
 import os.path, json, pandas, ftplib
 
 
 class wb_user:
 
-    def __init__(self, json_path, stock_dic, is_pwb, data_range = ['3d', '1m']):
+    def __init__(self, json_path, stock_dic, is_pwb):
         self.stock_dic = stock_dic
         if not os.path.exists("../Data/back_up.json"):
             with open("../Data/back_up.json", "w") as f:
@@ -21,7 +23,7 @@ class wb_user:
         self.wb, self.pwb = webull(), paper_webull()
         self.stats_index, self.buy_flag, self.sell_flag, self.trade_counter = {}, {}, {}, {}
         self.trade_record = []
-        self.data_range = data_range
+       
         self.next_day_dic = {}
         self.all_stocks_ticker = []
         self.memory = []
@@ -34,7 +36,7 @@ class wb_user:
 
     # helper function to get stock data
     def _create_stock_info(self, stock_name):
-        each_stock = stock_data(stock_name = stock_name, period = self.data_range[0], interval = self.data_range[1])
+        each_stock = stock_data_origin(stock_name = stock_name, period='3d', interval='1m')
         each_stock.set_buy_flag(self.buy_flag)
         each_stock.set_sell_flag(self.sell_flag)
         each_stock.get_stats_info(self.stats_index)
@@ -65,36 +67,32 @@ class wb_user:
         return 'File Creation Time' not in ticker and 'Symbol' not in ticker and "$" not in ticker and "." not in ticker and ticker not in self.all_stocks_ticker
 
     def create_all_stock_tickers(self):
-        ftp = ftplib.FTP('ftp.nasdaqtrader.com', 'anonymous', 'anonymous@debian.org')
-        
-        # Download files nasdaqlisted.txt and otherlisted.txt from ftp.nasdaqtrader.com
-        for ficheiro in ["nasdaqlisted.txt", "otherlisted.txt"]:
-                ftp.cwd("/SymbolDirectory")
-                localfile = open(f'../Data/{ficheiro}', 'wb')
-                ftp.retrbinary('RETR ' + ficheiro, localfile.write)
-                localfile.close()
-        ftp.quit()
-        
-        # Grep for common stock in nasdaqlisted.txt and otherlisted.txt
-
-        self.all_stocks_ticker = []
-
-        for ficheiro in ["nasdaqlisted.txt", "otherlisted.txt"]:
-                localfile = open(f'../Data/{ficheiro}', 'r')
-                open("../Data/tickers.txt", "w")
-                for line in localfile:
-                    #print(line)
-                    ticker = line.split("|")[0]
-                    if self._check_if_ticker_in_list(ticker):
-                        self.all_stocks_ticker.append(ticker)
+    
+        csv_list = pandas.read_csv('../Data/nasdaq.csv', keep_default_na=False)
+        self.all_stocks_ticker = csv_list[csv_list.columns[0]]
 
 
     def simulation_2_filter(self):
-        pass_stock = {}
+        pass_stock = []
         for ticker in self.all_stocks_ticker:
-            if '^' in ticker or '/' in ticker: continue
             try:
-                stock = stock_data(stock_name=ticker, period = '7d')
+                # Get the current date in local time
+                today = datetime.today().date()
+
+                # Add one day to get tomorrow's date
+                tomorrow = today + timedelta(days=1)
+
+                # Construct a datetime object for midnight tomorrow
+                midnight_tomorrow = datetime.combine(tomorrow, time.min)
+
+                # Get the Unix timestamp for midnight tomorrow
+                tomorrow = int(tm.mktime(midnight_tomorrow.timetuple()))
+
+
+                #get the date of 5 days ago in unix timestamp
+                five_days_ago = tomorrow - 604800
+
+                stock = stock_data(stock_name=ticker, start = five_days_ago, end = tomorrow)
                 stock.get_stats_info(['kdjj'])
                 time_diff, time_sum, stock_num, base_value = 0, 0, 0, 10000
                 time_tracker = [-1, -1]
@@ -136,8 +134,9 @@ class wb_user:
                 if stock_num != 0:
                     base_value += stock.get_current_price() * stock_num
                 
-                if fail_count / trade_count <= 0.2 and trade_count >= 35 and base_value > 10350:
-                    pass_stock[ticker] = {
+                if trade_count > 0 and fail_count / trade_count <= 0.25 and trade_count >= 5 and base_value > 10350:
+                    print(ticker)
+                    pass_stock.append({
                         'name': ticker,
                         'final_value': base_value,
                         'trade_count': trade_count,
@@ -145,30 +144,13 @@ class wb_user:
                         'avg_day': time_sum / trade_count,
                         'short_mins': time_tracker[0],
                         'long_mins': time_tracker[1]
-                    }
-                total_outcome += base_value
+                    })
+                #total_outcome += base_value
 
             except Exception as e:
+                print(e)
                 continue
-
-        sorted_list = [pass_stock[list(pass_stock.keys())[0]]]
-        sort_key = 'fail_chance'
-
-        for stock_name in list(pass_stock.keys())[1:]:
-            last_val = sorted_list[-1][sort_key]
-            check_val = pass_stock[stock_name][sort_key]
-            if check_val > last_val:
-                continue
-            for i in range(0, len(sorted_list)):
-                loop_val = sorted_list[i][sort_key]
-                if loop_val > check_val:
-                    sorted_list = sorted_list[:i] + [pass_stock[stock_name]] + sorted_list[i:]
-                    break
-            if len(sorted_list) > 10:
-                sorted_list = sorted_list[:-1]
-
-        sorted_name = []
-        
+        sorted_list = sorted(pass_stock, key=lambda x: (x['fail_chance'], -x['final_value']))[:10]
         self.next_day_dic = {stock["name"]: 0 for stock in sorted_list}
         
         
@@ -182,6 +164,7 @@ class wb_user:
                 each_stock = self._create_stock_info(key)
                 should_buy = each_stock.should_buy()
                 should_sell = each_stock.should_sell()
+                
                 quant = 10000 // each_stock.get_current_price()
                 real_quant = 1500 // each_stock.get_current_price()
                 if value == 0 and should_buy['kdjj']:
@@ -193,6 +176,7 @@ class wb_user:
                     if self.is_pwb: 
                         self.stock_dic[key] = quant
                         self.pwb.place_order(stock = key, action = "BUY", orderType = "MKT", enforce = "DAY", quant = quant)
+                        print("buy ", key, "with ", quant, " shares")
                     else: 
                         self.stock_dic[key] = real_quant
                         buy_out = self.wb.place_order(stock = key, action = "BUY", orderType = "MKT", enforce = "DAY", quant = real_quant)
@@ -202,7 +186,9 @@ class wb_user:
                     #finished_td.sell_update(end_time = str(datetime.now()), end_price = each_stock.get_current_price())
                     #self.trade_record.append(finished_td)
                     self.stock_dic[key] = 0
-                    if self.is_pwb: self.pwb.place_order(stock = key, action = "SELL", orderType = "MKT", enforce = "DAY", quant = value)
+                    if self.is_pwb:
+                         self.pwb.place_order(stock = key, action = "SELL", orderType = "MKT", enforce = "DAY", quant = value)
+                         print("sell ", key, "with ", value, " shares")
                     else: self.wb.place_order(stock = key, action = "SELL", orderType = "MKT", enforce = "DAY", quant = value)
                     if(key in self.memory):
                         del self.memory[self.memory.index(key)]
@@ -215,7 +201,17 @@ class wb_user:
         with open("../Data/back_up.json", 'w') as f:
             json.dump(self.stock_dic, f)
         
-        
+    def sell_all_stocks(self):
+        for key in self.stock_dic:
+            if self.stock_dic[key] != 0:
+                quant = self.stock_dic[key]
+                if self.is_pwb:
+                    self.pwb.place_order(stock = key, action = "SELL", orderType = "MKT", enforce = "DAY", quant = quant)
+                    print("sell ", key, "with ", quant, " shares")
+                else: self.wb.place_order(stock = key, action = "SELL", orderType = "MKT", enforce = "DAY", quant = quant)
+                self.stock_dic[key] = 0
+        with open("../Data/back_up.json", 'w') as f:
+            json.dump(self.stock_dic, f)    
 
     # write into a file with all the records
     def write_trade_record(self):
@@ -288,7 +284,7 @@ if __name__ == "__main__":
     for key in stock_list:
         stock_dic[key] = 0
 
-    test_user = wb_user("../Data/webull_credentials.json", stock_dic, is_pwb = True)
+    test_user = wb_user("webull_credentials.json", stock_dic, is_pwb = True)
     #wb_id = test_user.login_wb()
     pwb_id = test_user.login_pwb()
 
