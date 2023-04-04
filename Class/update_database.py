@@ -17,7 +17,7 @@ mydb = mysql.connector.connect(
 
 def get_all_info():
 	try:
-		df = read_csv("nasdaq.csv", keep_default_na=False)
+		df = read_csv("combined_stocks.csv", keep_default_na=False)
 		tickers = df["Symbol"].tolist()
 		names = df["Name"].tolist()
 		args_iter = []
@@ -51,7 +51,7 @@ def get_all_info_worker(ticker, name):
 
 def get_all_history():
 	try:
-		df = read_csv("nasdaq.csv", keep_default_na=False)
+		df = read_csv("combined_stocks.csv", keep_default_na=False)
 		tickers = df["Symbol"].tolist()
 	
 		start = T.time()
@@ -78,14 +78,20 @@ def get_all_history_worker(ticker):
 			high_dict = history["High"].to_dict()
 			low_dict = history["Low"].to_dict()
 			volume_dict = history["Volume"].to_dict()
+			#average daily trading volume from volume_dict
+			# vol = []
+			# for time, volume in volume_dict.items():
+			# 	vol.append(volume)
+			# adtv = (sum(vol)/len(vol))
+
 			for time,open in open_dict.items():
-				
 				close = close_dict[time]
 				high = high_dict[time]
 				low = low_dict[time]
 				volume = volume_dict[time]
 				try:
 					cursor.execute(''' INSERT IGNORE INTO stock_prices_1m(symbol,date,open,close,high,low,volume) VALUES(%s,%s,%s,%s,%s,%s,%s)''',(ticker, time, open, close, high, low, volume))
+					#cursor.execute(''' INSERT IGNORE INTO stock_prices(symbol,date,open,close,high,low,volume,adtv) VALUES(%s,%s,%s,%s,%s,%s,%s,%s)''',(ticker, time, open, close, high, low, volume, adtv))
 				except mysql.connector.Error as err:
 					print("MySQL error: {}".format(err))
 				mydb.commit()
@@ -95,11 +101,11 @@ def get_all_history_worker(ticker):
 	return "Done"
 
 if __name__ == "__main__":
-	schedule.every().monday.at("16:45").do(get_all_history)
-	schedule.every().tuesday.at("16:45").do(get_all_history)
-	schedule.every().wednesday.at("16:45").do(get_all_history)
-	schedule.every().thursday.at("16:45").do(get_all_history)
-	schedule.every().friday.at("16:45").do(get_all_history)
+	schedule.every().monday.at("16:02").do(get_all_history)
+	schedule.every().tuesday.at("16:02").do(get_all_history)
+	schedule.every().wednesday.at("16:02").do(get_all_history)
+	schedule.every().thursday.at("16:02").do(get_all_history)
+	schedule.every().friday.at("16:02").do(get_all_history)
 
 	while True:
 		schedule.run_pending()

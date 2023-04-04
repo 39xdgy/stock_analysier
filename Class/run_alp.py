@@ -1,5 +1,5 @@
 import sys, schedule, time, json, pandas
-from wb_user import wb_user
+from alp_user import alp_user
 from update_database import *
 
 
@@ -11,17 +11,16 @@ long_stock_dic, short_stock_dic = {}, {}
 
 #for key in long_stock_list: long_stock_dic[key] = 0
 short_stock_dic = {key: 0 for key in stock_list}
-short_user = wb_user(json_path = "../Class/webull_credentials.json", stock_dic = short_stock_dic, is_pwb = True)
+with open('../Data/confidentials.json') as json_file:
+    data = json.load(json_file)
+    paper_secret_key = data["paper_secret_key"]
+    paper_api_key = data["paper_api_key"]
 
-# trade_key = ''
-# with open("../Data/trade_key.json", "r") as f:
-#     key_dic = json.load(f)
-#     trade_key = key_dic['pwd']
+    api_key = data["api_key"]
+    secret_key = data["secret_key"]
 
+short_user = alp_user(stock_dic = short_stock_dic, paper_trading = True, api_key = paper_api_key, secret_key = paper_secret_key)
 
-short_user.login_pwb()
-
-#short_user.login_wb(trade_key)
 
 stats_index = ['kdjj']
 buy_flag = {'kdjj': 15}

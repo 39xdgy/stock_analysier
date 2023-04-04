@@ -1,16 +1,18 @@
-from webull import paper_webull, webull
+import math
 from stock_data import stock_data
 from stock_data_origin import stock_data_origin
 from trade import trade as td
 from datetime import datetime, timedelta, time
 import time as tm
+from alpaca.trading.client import TradingClient
+from alpaca.trading.requests import MarketOrderRequest
+from alpaca.trading.enums import OrderSide, TimeInForce
+import os.path, json, pandas
 
-import os.path, json, pandas, ftplib
 
+class alp_user:
 
-class wb_user:
-
-    def __init__(self, json_path, stock_dic, is_pwb):
+    def __init__(self, stock_dic, paper_trading, api_key, secret_key):
         self.stock_dic = stock_dic
         if not os.path.exists("../Data/back_up.json"):
             with open("../Data/back_up.json", "w") as f:
@@ -18,9 +20,12 @@ class wb_user:
         else: 
             with open("../Data/back_up.json", "r") as f:
                 self.stock_dic = json.load(f)
-        self.json_path = json_path
-        self.is_pwb = is_pwb
-        self.wb, self.pwb = webull(), paper_webull()
+        self.is_paper = paper_trading
+        if self.is_paper:
+            self.trading_client = TradingClient(api_key, secret_key, paper=True)
+        else:
+            self.trading_client = TradingClient(api_key, secret_key, paper=False)
+       
         self.stats_index, self.buy_flag, self.sell_flag, self.trade_counter = {}, {}, {}, {}
         self.trade_record = []
        
@@ -170,34 +175,82 @@ class wb_user:
                 should_buy = each_stock.should_buy()
                 should_sell = each_stock.should_sell()
                 
-                quant = 10000 // each_stock.get_current_price()
-                real_quant = 100 // each_stock.get_current_price()
+                if self.is_paper:
+                    quant = math.floor(100/each_stock.get_current_price() * 100) / 100
+                else:
+                    quant = math.floor(100/each_stock.get_current_price() * 100) / 100
+        
                 if value == 0 and should_buy['kdjj']:
                     new_td = td()
                     new_td.buy_update(name = key, start_time = str(datetime.now()), start_price = each_stock.get_current_price(), amount = quant)
                     self.trade_counter[key] = new_td
                     self.stock_dic[key] = quant
                     
-                    if self.is_pwb: 
+                    if self.is_paper: 
                         self.stock_dic[key] = quant
-                        self.pwb.place_order(stock = key, action = "BUY", orderType = "MKT", enforce = "DAY", quant = quant)
-                        print("buy ", key, "with ", quant, " shares")
+                        # preparing orders
+                        market_order_data = MarketOrderRequest(
+                                            symbol = key,
+                                            qty = quant,
+                                            side = OrderSide.BUY,
+                                            time_in_force = TimeInForce.DAY
+                                            )
+
+                        # Market order
+                        market_order = self.paper_trading_client.submit_order(
+                                        order_data=market_order_data
+                                    )
+                        print(market_order)
                     else: 
-                        self.stock_dic[key] = real_quant
-                        buy_out = self.wb.place_order(stock = key, action = "BUY", orderType = "MKT", enforce = "DAY", quant = real_quant)
-                        print("buy ", key, "with ", quant, " shares")
+                        self.stock_dic[key] = quant
+                        # preparing orders
+                        market_order_data = MarketOrderRequest(
+                                            symbol = key,
+                                            qty = quant,
+                                            side = OrderSide.BUY,
+                                            time_in_force = TimeInForce.DAY
+                                            )
+
+                        # Market order
+                        market_order = self.trading_client.submit_order(
+                                        order_data=market_order_data
+                                    )
+                        print(market_order)
                 elif (not value == 0) and should_sell['kdjj']:
                     #finished_td = self.trade_counter[key]
                     #finished_td.sell_update(end_time = str(datetime.now()), end_price = each_stock.get_current_price())
                     #self.trade_record.append(finished_td)
                     self.stock_dic[key] = 0
-                    if self.is_pwb:
-                         self.pwb.place_order(stock = key, action = "SELL", orderType = "MKT", enforce = "DAY", quant = value)
-                         print("sell ", key, "with ", value, " shares")
-                    else: 
-                        self.wb.place_order(stock = key, action = "SELL", orderType = "MKT", enforce = "DAY", quant = value)
-                        print("sell ", key, "with ", value, " shares")
+                    if self.is_paper:
+                        self.stock_dic[key] = quant
+                        # preparing orders
+                        market_order_data = MarketOrderRequest(
+                                            symbol = key,
+                                            qty = quant,
+                                            side = OrderSide.SELL,
+                                            time_in_force = TimeInForce.DAY
+                                            )
 
+                        # Market order
+                        market_order = self.paper_trading_client.submit_order(
+                                        order_data=market_order_data
+                                    )
+                        print(market_order)
+                    else: 
+                        self.stock_dic[key] = quant
+                        # preparing orders
+                        market_order_data = MarketOrderRequest(
+                                            symbol = key,
+                                            qty = quant,
+                                            side = OrderSide.SELL,
+                                            time_in_force = TimeInForce.DAY
+                                            )
+
+                        # Market order
+                        market_order = self.trading_client.submit_order(
+                                        order_data=market_order_data
+                                    )
+                        print(market_order)
 
                     if(key in self.memory):
                         del self.memory[self.memory.index(key)]
@@ -214,11 +267,36 @@ class wb_user:
         for key in self.stock_dic:
             if self.stock_dic[key] != 0:
                 quant = self.stock_dic[key]
-                if self.is_pwb:
-                    self.pwb.place_order(stock = key, action = "SELL", orderType = "MKT", enforce = "DAY", quant = quant)
-                    print("sell ", key, "with ", quant, " shares")
-                else: self.wb.place_order(stock = key, action = "SELL", orderType = "MKT", enforce = "DAY", quant = quant)
-                self.stock_dic[key] = 0
+                if self.is_paper:
+                    self.stock_dic[key] = quant
+                    # preparing orders
+                    market_order_data = MarketOrderRequest(
+                                        symbol = key,
+                                        qty = quant,
+                                        side = OrderSide.SELL,
+                                        time_in_force = TimeInForce.DAY
+                                        )
+
+                    # Market order
+                    market_order = self.paper_trading_client.submit_order(
+                                    order_data=market_order_data
+                                )
+                    print(market_order)
+                else: 
+                    self.stock_dic[key] = quant
+                    # preparing orders
+                    market_order_data = MarketOrderRequest(
+                                        symbol = key,
+                                        qty = quant,
+                                        side = OrderSide.SELL,
+                                        time_in_force = TimeInForce.DAY
+                                        )
+
+                    # Market order
+                    market_order = self.trading_client.submit_order(
+                                    order_data=market_order_data
+                                )
+                    print(market_order)
         with open("../Data/back_up.json", 'w') as f:
             json.dump(self.stock_dic, f)    
 
@@ -233,77 +311,4 @@ class wb_user:
         f.write(write_str)
         f.close()
 
-    # login to the webull real account
-    def login_wb(self, trade_pwd):
-        fh = open(self.json_path, 'r')
-        credential_data = json.load(fh)
-        fh.close()
-
-        self.wb._refresh_token = credential_data['refreshToken']
-        self.wb._access_token = credential_data['accessToken']
-        self.wb._token_expire = credential_data['tokenExpireTime']
-        self.wb._uuid = credential_data['uuid']
-
-        n_data = self.wb.refresh_login()
-        #print(n_data)
-        credential_data['refreshToken'] = n_data['refreshToken']
-        credential_data['accessToken'] = n_data['accessToken']
-        credential_data['tokenExpireTime'] = n_data['tokenExpireTime']
-
-        file = open(self.json_path, 'w')
-        json.dump(credential_data, file)
-        file.close()
-        
-        # important to get the account_id
-        self.wb._account_id = self.wb.get_account_id()
-        self.wb.get_trade_token(trade_pwd)
-        return self.wb.get_account_id()
-
-    # login to the webull paper trading account
-    def login_pwb(self):
-        fh = open(self.json_path, 'r')
-        credential_data = json.load(fh)
-        fh.close()
-
-        self.pwb._refresh_token = credential_data['refreshToken']
-        self.pwb._access_token = credential_data['accessToken']
-        self.pwb._token_expire = credential_data['tokenExpireTime']
-        self.pwb._uuid = credential_data['uuid']
-
-        n_data = self.pwb.refresh_login()
-        print(n_data)
-        credential_data['refreshToken'] = n_data['refreshToken']
-        credential_data['accessToken'] = n_data['accessToken']
-        credential_data['tokenExpireTime'] = n_data['tokenExpireTime']
-
-        file = open(self.json_path, 'w')
-        json.dump(credential_data, file)
-        file.close()
-        
-
-        # important to get the account_id
-        return self.pwb.get_account_id()
-
-
-if __name__ == "__main__":
-    import schedule, time
-
-    stock_list = ["TTE", "SGOC", "CPK", "HQI", "TDAC", "NXPI", "AB", "FIVN", "SILV", "HUBS"]
-    stock_dic = {}
-    for key in stock_list:
-        stock_dic[key] = 0
-
-    test_user = wb_user("webull_credentials.json", stock_dic, is_pwb = True)
-    #wb_id = test_user.login_wb()
-    pwb_id = test_user.login_pwb()
-
-
-    stats_index = ['kdjj']
-    buy_flag = {'kdjj': 15}
-    sell_flag = {'kdjj': 85}
-    test_user.set_trade_data((stats_index, buy_flag, sell_flag))
-    #schedule.every().saturday.at("14:42").do(test_user.trade)
-    test_user.create_all_stock_tickers()
-    test_user.simulation_2_filter()
-    test_user.update_stock_list()
 
